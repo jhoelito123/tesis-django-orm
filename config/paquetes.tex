@@ -53,13 +53,27 @@
 % Formato de párrafos e interlineado
 \usepackage{setspace}
 \onehalfspacing % 1.5
-\parskip=10pt   % Espaciado entre párrafos
+\parskip=12pt   % Espaciado entre párrafos
 
 
-% CONTROL DE ESPACIADO EN TÍTULOS Y SECCIONES
+% ==========================================
+% FORMATO DE TÍTULOS IDÉNTICO A GOOGLE DOCS
+% ==========================================
 \usepackage{titlesec}
 
-\titlespacing*{\chapter}{0pt}{10pt}{8pt}
-\titlespacing*{\section}{0pt}{8pt}{4pt}
-\titlespacing*{\subsection}{0pt}{6pt}{3pt}
-\titlespacing*{\subsubsection}{0pt}{4pt}{2pt}
+% Rediseña \chapter para que quede: "CAPÍTULO I - TÍTULO" en una sola línea centrada
+\titleformat{\chapter}[block]
+  {\normalfont\Large\bfseries\centering} % Formato: Negrita, Tamaño Grande, Centrado
+  {\chaptertitlename\ \thechapter\ --\ } % Etiqueta: CAPÍTULO I -
+  {0pt}                                  % Espacio entre etiqueta y título
+  {\Large}                               % Tamaño del texto del título
+
+
+\titlespacing*{\chapter}{0pt}{-20pt}{15pt}
+
+
+\titleformat{\section}
+  {\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titlespacing*{\subsection}{0pt}{10pt}{4pt}
