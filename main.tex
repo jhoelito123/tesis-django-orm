@@ -1,0 +1,48 @@
+\documentclass[12pt, letterpaper, twoside]{report}
+
+% configuraciones
+\input{config/paquetes}
+\input{config/variables}
+
+\begin{document}
+
+\input{preliminares/00-caratula}
+
+\pagenumbering{roman}
+\input{preliminares/01-dedicatoria}
+\input{preliminares/02-agradecimientos}
+\input{preliminares/03-resumen}
+
+% Generación de índices
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+
+% capitulos
+\pagenumbering{arabic}
+
+\include{capitulos/01-introduccion}
+\include{capitulos/02-marco-teorico}
+\include{capitulos/03-area-aplicacion}
+
+% Capítulo IV: Desarrollo del Proyecto (Orquestado por Sub-prototipos)
+\chapter{DESARROLLO DEL PROYECTO}
+\label{cap:desarrollo}
+\input{capitulos/04-1-prototipo1}
+\input{capitulos/04-2-prototipo2}
+\input{capitulos/04-3-prototipo3}
+
+\include{capitulos/05-conclusiones}
+
+% anexos y bibliografia
+\appendix
+\include{anexos/anexo-a-codigo}
+\include{anexos/anexo-b-pruebas}
+
+\bibliographystyle{plain}
+\bibliography{referencias}
+
+\end{document}

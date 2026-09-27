@@ -1,0 +1,56 @@
+% Idioma
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+
+% Márgenes
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=2.5cm]{geometry}
+
+% Gráficos y Colores
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% Paquetes para código fuente
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+% \usepackage{plantuml}
+
+% Enlaces hipervínculos
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+    citecolor=black
+}
+
+% Formato de párrafos e interlineado
+\usepackage{setspace}
+\onehalfspacing % 1.5
+\parskip=6pt   % Espaciado entre párrafos
