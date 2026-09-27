@@ -1,0 +1,60 @@
+\begin{titlepage}
+    \centering
+    
+    % Encabezado con espacio reservado para los 2 logos
+    \begin{minipage}[c]{0.2\textwidth}
+        % Descomentar cuando subas las imágenes de los logos:
+        % \includegraphics[width=\textwidth]{figuras/logo_umss.png}
+    \end{minipage}%
+    \begin{minipage}[c]{0.6\textwidth}
+        \centering
+        {\bfseries \small \universidad \par}
+        \vspace{0.1cm}
+        {\bfseries \small \facultad \par}
+        \vspace{0.1cm}
+        {\bfseries \small \carrera \par}
+    \end{minipage}%
+    \begin{minipage}[c]{0.2\textwidth}
+        % Descomentar cuando subas las imágenes de los logos:
+        % \includegraphics[width=\textwidth]{figuras/logo_fcyt.png}
+    \end{minipage}
+    
+    \vspace{3cm}
+    
+    % Cuadro del Título (Borde negro de 1.5pt con padding interior)
+    \setlength{\fboxrule}{1.5pt}
+    \setlength{\fboxsep}{12pt}
+    \fbox{%
+        \begin{minipage}{0.85\textwidth}
+            \centering
+            \bfseries \normalsize \tituloTesis
+        \end{minipage}%
+    }
+    
+    \vspace{2.5cm}
+    
+    % Modalidad centrada
+    \begin{minipage}{0.8\textwidth}
+        \centering
+        \small \modalidadTesis
+    \end{minipage}
+    
+    \vspace{3.5cm}
+    
+    % Bloque de Datos alineado a la Izquierda
+    \begin{raggedright}
+        \hspace{0.05\textwidth}
+        \begin{tabular}{ll}
+            \textbf{Presentado por:} & \autorTesis \\[0.2cm]
+            \textbf{Tutor:}          & \tutorTesis
+        \end{tabular}
+    \end{raggedright}
+    
+    \vfill
+    
+    % Pie de página (Ubicación y Fecha)
+    {\bfseries \small \ubicacion \par}
+    \vspace{0.1cm}
+    {\bfseries \small \fechaDefensa \par}
+
+\end{titlepage}
