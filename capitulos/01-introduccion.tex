@@ -1,1 +1,96 @@
-Se utilizará ANTLR para el análisis sintáctico \cite{parr2013definitive}.
+\chapter{INTRODUCCIÓN}
+\label{cap:introduccion}
+
+\section{Antecedentes}
+\label{sec:antecedentes}
+A nivel mundial, la gestión de datos y el diseño de bases de datos se ha convertido en un
+pilar esencial para el desarrollo de software. Las metodologías modernas de desarrollo de
+software tienden a incorporar Object Relational Mappers (ORMs) como herramientas que
+permiten automatizar la creación, mantenimiento y consulta de las bases de datos.
+Frameworks como Django (Python), Hibernate (Java) y Prisma (JavaScript/TypeScript) han
+impulsado la adopción masiva de ORMs debido a su capacidad para reducir hasta un 40%
+el tiempo de desarrollo en la capa de persistencia de datos (JetBrains Developer Ecosystem
+Survey, 2022).\\
+Sin embargo, persiste un problema global: la curva de aprendizaje y el diseño correcto de
+los modelos de datos. Muchas fallas en proyectos de software provienen de mal diseño en
+los modelos entidad-relación (ciclos, dependencias incorrectas, redundancia), lo cual genera
+sobrecostos y problemas de escalabilidad.\\
+En respuesta a esta problemática, se ha avanzado en el desarrollo de herramientas visuales
+con arquitecturas multi-lenguaje, como es el caso de un diagramador Entidad-Relación
+basado en Gramática de Idioms (un Lenguaje Intermedio Estructurado).
+La existencia de esta arquitectura resuelve la etapa compleja del modelaje visual y la
+interpretación conceptual de los modelos de datos, pero expone una nueva brecha: la
+necesidad de desarrollar módulos de traducción específicos para explorar distintos
+ecosistemas de desarrollo moderno. Actualmente, la herramienta ya implementa la
+generación de código para ORMs como Prisma, pero carece de un generador para el
+ecosistema Python/Django, siendo este uno de los frameworks web más demandados.
+Esto genera una brecha: los desarrolladores que utilizan Python y Django, logran diagramas
+visuales, pero luego deben reescribir o adaptar manualmente el código en su ORM de
+preferencia, lo cual duplica el trabajo, aumenta errores humanos y retrasa los tiempos de
+entrega. No existe un módulo accesible que aproveche la arquitectura multi-lenguaje
+existente para integrar directamente la diagramación conceptual con la generación de
+código ORM para Django.
+La propuesta busca aprovechar y extender la herramienta para diseñar e implementar un
+módulo de traducción que genere automáticamente el código ORM de Django.
+
+\section{Planteamiento del Problema}
+\label{sec:planteamiento-problema}
+
+\subsection{Formulación del Problema}
+\label{subsec:formulacion-problema}
+
+Actualmente, los desarrolladores de software deben traducir manualmente las especificaciones conceptuales expresadas en diagramas Entidad-Relación e *idioms* de modelado hacia código ejecutable en Django ORM. Este proceso manual genera cuellos de botella en el ciclo de vida del desarrollo de software, incrementa el riesgo de introducir fallas en las definiciones de relaciones (llaves foráneas, relaciones muchos a muchos) y dificulta el mantenimiento continuo de la consistencia entre el diseño conceptual y la implementación.
+
+Por lo tanto, se plantea la siguiente interrogante principal:
+\begin{quote}
+    \itshape ¿Es posible automatizar la generación de modelos de código Django ORM a partir de la representación semántica y gramática de *idioms* de un diagramador Entidad-Relación mediante la integración de analizadores sintácticos y modelos de lenguaje de código?
+\end{quote}
+
+\section{Objetivos}
+\label{sec:objetivos}
+
+\subsection{Objetivo General}
+\label{subsec:objetivo-general}
+
+Desarrollar un módulo generador de código Django ORM basado en la gramática de *idioms* de un diagramador Entidad-Relación, integrando componentes de análisis sintáctico y traducción mediante modelos de lenguaje para automatizar la construcción de la capa de persistencia en aplicaciones web.
+
+\subsection{Objetivos Específicos}
+\label{subsec:objetivos-especificos}
+
+\begin{enumerate}
+    \item Definir y formalizar la gramática y representación de *idioms* para el diagramador Entidad-Relación mediante herramientas de análisis sintáctico (ANTLR).
+    \item Diseñar la arquitectura del pipeline de generación e integración del modelo de lenguaje (CodeT5) especializado en la traducción de representaciones sintácticas a sintaxis nativa de Django ORM.
+    \item Implementar la metodología basada en prototipos para la construcción incremental del módulo traductor y los componentes del pipeline.
+    \item Construir y evaluar un conjunto de datos (*dataset*) sintético y real de pares de representación de *idioms* y su correspondiente código Django ORM para el entrenamiento/fine-tuning y evaluación del modelo.
+    \item Evaluar el desempeño del módulo generador mediante métricas de exactitud sintáctica y semántica en la traducción de modelos de datos.
+\end{enumerate}
+
+\section{Justificación}
+\label{sec:justificacion}
+
+\subsection{Justificación Técnica}
+La integración de gramáticas formales procesadas con ANTLR junto con modelos de lenguaje específicos para código como CodeT5 permite superar las limitaciones de los generadores estáticos basados en plantillas, ofreciendo una traducción más precisa, semánticamente rica y adaptable a patrones complejos de Django ORM.
+
+\subsection{Justificación Práctica}
+Automatizar la generación del código de persistencia reduce drásticamente los tiempos de desarrollo inicial en proyectos web, disminuye los errores humanos asociados a la escritura manual de migraciones y modelos, y acelera la fase de prototipado para equipos de desarrollo de software.
+
+\subsection{Justificación Académica}
+Este proyecto aporta al área de la ingeniería de software y la inteligencia artificial aplicada, demostrando la viabilidad de combinar analizadores sintácticos deterministas con modelos de aprendizaje profundo en tareas de ingeniería de lenguaje y generación de código fuente.
+
+\section{Alcance y Limitaciones}
+\label{sec:alcance-limitaciones}
+
+\subsection{Alcance}
+\begin{itemize}
+    \item El sistema soportará la entrada de representaciones semánticas derivadas de la gramática de *idioms* de diagramadores Entidad-Relación especificadas.
+    \item La generación de código se enfocará exclusivamente en modelos válidos para el marco de trabajo Django ORM en versión Python 3.x.
+    \item Se contemplará el manejo de entidades, atributos (primarios, simples, compuestos, derivados) y relaciones (1:1, 1:N, N:M) con sus respectivas restricciones de integridad relacional.
+    \item El módulo se entregará como un componente funcional probado bajo los escenarios de evaluación definidos en los prototipos.
+\end{itemize}
+
+\subsection{Limitaciones}
+\begin{itemize}
+    \item No se abordará la generación de la interfaz de usuario ni la lógica de negocio externa a los modelos de persistencia del ORM.
+    \item La generación de código está supeditada al soporte expresado dentro de la gramática de *idioms* formalizada en el alcance del proyecto.
+    \item El rendimiento del modelo de lenguaje dependerá de las capacidades de cómputo para el proceso de fine-tuning y ejecución de inferencias.
+\end{itemize}
