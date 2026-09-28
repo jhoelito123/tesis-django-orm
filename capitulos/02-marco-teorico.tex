@@ -107,4 +107,98 @@ Una de las características de este Idiom es que el conjunto de clasificadores p
 
 La utilización de este Idiom permite representar explícitamente la relación semántica entre una entidad y los valores que pueden clasificarla, evitando incorporar directamente dichos valores como atributos independientes dentro de la entidad clasificada. De esta manera, la estructura del modelo puede mantener una separación entre los elementos que representan entidades del dominio y aquellos que funcionan como valores de clasificación.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.25\textwidth]{diagramas/erd_clasificacion/erd_clasificacion.png}
+    \caption{Representación en lenguaje ERD del patrón de clasificación.}
+    \label{fig:erd-clasificacion}
+\end{figure}
+
 \subsubsection{Composición}
+El Idiom de composición permite representar una entidad como resultado de la combinación de otras entidades que participan en su conformación. Este patrón proporciona una forma estructurada de expresar relaciones en las que varios elementos del dominio intervienen conjuntamente para representar una entidad o concepto compuesto.
+
+A diferencia de representar directamente estas situaciones mediante una relación genérica entre entidades, el Idiom de composición permite identificar de manera explícita cuáles son los elementos que participan en la formación del elemento compuesto. De esta manera, la estructura del modelo refleja con mayor claridad la dependencia conceptual existente entre sus componentes.
+
+Una característica de este Idiom es que no establece una cantidad fija de entidades participantes. Una composición puede involucrar dos o más entidades, dependiendo de las características del dominio que se desea representar. Esto permite utilizar el mismo patrón en diferentes escenarios y con distintos niveles de complejidad.
+
+Asimismo, la composición puede utilizarse para representar diferentes configuraciones de un mismo concepto compuesto. Cuando el dominio requiere considerar cambios o variantes a lo largo del tiempo, es posible asociar información temporal al elemento resultante, permitiendo distinguir diferentes versiones o estados de la composición.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.25\textwidth]{diagramas/erd_composicion/erd_composicion.png}
+    \caption{Representación en lenguaje ERD del patrón de composición.}
+    \label{fig:erd-composicion}
+\end{figure}
+
+\subsubsection{Maestro-Detalle}
+El Idiom de Maestro-Detalle permite representar situaciones en las que una entidad principal mantiene una relación con una o varias entidades dependientes. En este patrón, la entidad maestra representa el elemento principal del modelo, mientras que las entidades de detalle contienen información asociada cuya existencia se encuentra vinculada al elemento principal.
+
+Este Idiom resulta útil cuando una determinada característica del dominio puede presentarse mediante múltiples elementos asociados a una misma entidad. En lugar de representar estos valores directamente como atributos con múltiples ocurrencias, el patrón permite modelarlos mediante una estructura independiente relacionada con la entidad maestra.
+
+Una de sus principales características es la posibilidad de representar una cantidad variable de elementos de detalle asociados a una misma entidad maestra. Esto permite modelar situaciones en las que el número de elementos relacionados puede aumentar o disminuir de acuerdo con las necesidades del dominio, sin requerir modificaciones en la estructura de la entidad principal.
+
+La separación entre la entidad maestra y sus elementos de detalle también contribuye a mantener una estructura más organizada del modelo conceptual. Los datos correspondientes al elemento principal permanecen diferenciados de aquellos que representan información dependiente, facilitando la interpretación de la relación entre ambos tipos de entidades.
+
+En este sentido, el Idiom de Maestro-Detalle constituye un patrón útil para representar estructuras en las que una entidad principal puede estar asociada con múltiples elementos dependientes, manteniendo explícita la relación existente entre ellos.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.25\textwidth]{diagramas/erd_maestro_detalle/erd_maestro_detalle.png}
+    \caption{Representación en lenguaje ERD del patrón maestro-detalle.}
+    \label{fig:erd-maestro-detalle}
+\end{figure}
+
+\subsubsection{Reflexivo}
+El Idiom Reflexivo permite representar situaciones en las que una entidad puede establecer relaciones con otras entidades del mismo tipo. En este patrón, una misma clase de entidad puede participar en diferentes roles dentro de una relación, permitiendo representar estructuras en las que los elementos relacionados pertenecen al mismo conjunto de entidades.
+
+Este Idiom resulta especialmente apropiado para representar estructuras jerárquicas o relaciones de dependencia. Por ejemplo, en un dominio organizacional, una entidad “Empleado” puede relacionarse con otra instancia de la misma entidad para representar la relación existente entre un empleado y su supervisor. De manera similar, puede utilizarse para representar estructuras como categorías y subcategorías, donde una categoría puede depender o estar relacionada con otra categoría del mismo tipo.
+
+Una característica importante del Idiom Reflexivo es que los roles que participan en la relación permiten diferenciar la función que cumple cada instancia dentro del vínculo. De esta manera, aunque los elementos involucrados pertenecen al mismo tipo de entidad, la relación puede expresar una diferencia semántica entre ellos.
+
+Este patrón permite representar estructuras que requieren relaciones entre elementos de una misma entidad sin necesidad de introducir una entidad adicional únicamente para expresar el vínculo. Por ello, resulta útil en dominios donde existen relaciones jerárquicas, dependencias o asociaciones entre elementos que pertenecen a un mismo conjunto.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.45\textwidth]{diagramas/erd_reflexivo/erd_reflexivo.png}
+    \caption{Representación en lenguaje ERD del patrón reflexivo.}
+    \label{fig:erd-reflexivo}
+\end{figure}
+
+\subsubsection{Reflexivo con historia}
+El Idiom Reflexivo con historia extiende el patrón Reflexivo mediante la incorporación de información histórica asociada a las relaciones entre entidades. Mientras que el Reflexivo permite representar una relación entre elementos que pertenecen al mismo tipo de entidad, esta variante permite además conservar los cambios que dicha relación experimenta a lo largo del tiempo.
+
+Para representar esta información, el Idiom incorpora una entidad encargada de almacenar los registros históricos de la relación. De esta manera, los cambios que se producen en el vínculo entre las entidades pueden conservarse como parte del modelo, en lugar de mantener únicamente el estado actual de la relación.
+
+Este patrón resulta útil en dominios donde el historial de una relación constituye información relevante. Por ejemplo, puede utilizarse para registrar la evolución de relaciones laborales, cambios de responsabilidad dentro de una organización o diferentes estados que haya presentado una relación entre entidades a lo largo del tiempo.
+
+La incorporación del componente histórico permite diferenciar entre el estado vigente de una relación y los estados que esta presentó anteriormente. Esto proporciona una representación más completa del dominio cuando resulta necesario consultar o conservar información relacionada con la evolución temporal de los vínculos entre entidades.
+
+En consecuencia, el Idiom Reflexivo con historia permite combinar la capacidad del patrón Reflexivo para representar relaciones entre elementos del mismo tipo con un mecanismo orientado a preservar el historial de dichas relaciones.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.55\textwidth]{diagramas/erd_reflexivo_historia/erd_reflexivo_historia.png}
+    \caption{Representación en lenguaje ERD del patrón reflexivo con historia.}
+    \label{fig:erd-reflexivo-historia}
+\end{figure}
+
+\subsubsection{IS-A o Generalización}
+El Idiom IS-A o Generalización permite representar relaciones jerárquicas entre tipos de entidades, estableciendo una relación entre un concepto general y uno o varios conceptos que representan especializaciones del mismo.
+
+En este patrón, una entidad general representa las características o propiedades comunes de un conjunto de entidades más específicas. Las entidades especializadas, por su parte, permiten representar categorías particulares del concepto general. De esta manera, el modelo puede expresar que un determinado tipo de entidad constituye una especialización de otro tipo más general.
+
+Una de las características de este Idiom es que permite representar estructuras de generalización con diferentes niveles de especialización. Una misma entidad general puede estar asociada con múltiples entidades especializadas, permitiendo representar diferentes categorías dentro de un mismo concepto. Asimismo, un modelo puede establecer relaciones de especialización entre distintos tipos de entidades cuando las características del dominio así lo requieran.
+
+Este patrón permite expresar diferencias conceptuales entre tipos de entidades sin limitar el modelo a una única estructura de clasificación. Por ejemplo, una entidad “Vehículo” puede representar un concepto general, mientras que “Automóvil” y “Motocicleta” pueden constituir especializaciones de dicho concepto.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.13\textwidth]{diagramas/erd_is_a/erd_is_a.png}
+    \caption{Representación en lenguaje ERD del patrón Is-A.}
+    \label{fig:erd-is-a}
+\end{figure}
+
+
+\section{Metodología de Desarrollo - Basada en prototipos}
+\label{sec: metodologia}
+\subsection{Definición}
+\label{subsec: proto-definicion}

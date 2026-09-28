@@ -1,0 +1,22 @@
+@startuml
+skinparam roundcorner 15
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+hide circle
+hide empty members
+
+entity "N" as N
+
+entity "M" as M {
+    # M_ID
+}
+
+N }|-- M : "detalla  \n es detallado  "
+
+@enduml

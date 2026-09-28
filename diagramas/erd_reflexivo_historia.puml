@@ -1,0 +1,26 @@
+@startuml
+skinparam roundcorner 15
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+hide circle
+hide empty members
+
+entity "E" as E {
+    # E_ID
+}
+
+entity "F" as F {
+    # F_ID
+}
+
+E ..|{ F : "entidad 1  \n  se relaciona con  "
+
+E ..|{ F : "entidad 2  \n  se relaciona con  "
+
+@enduml

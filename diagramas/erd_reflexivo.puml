@@ -1,0 +1,19 @@
+@startuml
+skinparam roundcorner 15
+skinparam shadowing false
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+hide circle
+hide empty members
+
+entity "D" as D {
+    # D_ID
+}
+
+D }|.. D : "entidad Z / entidad X"
+
+@enduml

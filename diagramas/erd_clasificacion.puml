@@ -1,0 +1,24 @@
+@startuml
+skinparam roundcorner 15
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+hide circle
+hide empty members
+
+entity "A" as A {
+    # A_ID
+}
+
+entity "B" as B {
+    # B_ID
+}
+
+A }-- B : "es clasificado por  \n  clasifica a  "
+
+@enduml

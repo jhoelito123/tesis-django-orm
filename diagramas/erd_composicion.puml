@@ -1,0 +1,27 @@
+@startuml
+skinparam roundcorner 15
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+hide circle
+hide empty members
+
+entity "A" as A {
+    # A_ID
+}
+
+entity "B" as B
+
+entity "C" as C {
+    # C_ID
+}
+
+A ..|{B : "compone a "
+B }|.. C : "es compuesto de "
+
+@enduml
