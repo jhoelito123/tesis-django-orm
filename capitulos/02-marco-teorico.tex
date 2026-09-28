@@ -1,0 +1,110 @@
+\chapter{MARCO TEÓRICO}
+\label{cap:marco}
+En este capítulo se presentan los fundamentos conceptuales que sustentan el desarrollo del presente proyecto de grado. Se revisan los principales enfoques teóricos, definiciones, características y elementos relevantes del área de conocimiento involucrada, con el fin de establecer una base sólida para la comprensión del problema planteado y de las soluciones propuestas.
+
+\section{Área de conocimiento}
+\label{sec:area-conocimiento}
+
+\subsection{Definición}
+\label{subsec:area-definiocion}
+
+El área de Bases de Datos se define como el campo de estudio centrado en la Teoría y Aplicación de los Sistemas de Gestión de Bases de Datos (SGBD).
+
+Desde una perspectiva de ingeniería, esta disciplina busca abstraer la complejidad del almacenamiento físico (los bits en el disco) y presentar una vista lógica coherente de los datos al usuario y a las aplicaciones. Esto implica el diseño de modelos de datos formales (como el Relacional, NoSQL, o Jerárquico) y la creación de un sistema robusto para el procesamiento concurrente de consultas y la protección de la información contra fallas del sistema o accesos no autorizados. (Pearson, 2022)
+
+\subsection{Características}
+\label{subsec:area-caracteristicas}
+
+El área de Bases de Datos se caracteriza por la búsqueda constante de los siguientes objetivos técnicos y de gestión:
+
+\paragraph{Modelado de Datos}
+Es la actividad central de la disciplina. Consiste en definir la estructura y las restricciones de la información, trasladando los requisitos del mundo real a un formato formal. Esto incluye el diseño conceptual, lógico y físico.
+
+\paragraph{Garantía de Transaccionalidad (ACID)}
+La disciplina se asegura de que las operaciones de modificación de datos se realicen de manera segura a través del concepto de Transacciones. Las propiedades ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad) son el pilar que garantiza que las bases de datos permanezcan en un estado válido a pesar de errores o concurrencias.
+
+\paragraph{Independencia de Datos}
+Busca separar la forma en que los datos se almacenan físicamente (almacenamiento en disco, índices) de la forma en que el usuario o la aplicación ven los datos (esquema lógico).
+
+\paragraph{Optimización del Rendimiento}
+A través del estudio de algoritmos de indexación, query planning y estructuras de almacenamiento, el área de Bases de Datos se enfoca en minimizar el tiempo de respuesta de las consultas y maximizar el rendimiento del sistema en entornos de alto volumen de datos y usuarios.
+
+\subsection{Elementos}
+\label{subsec:area-elementos}
+
+El Área de Bases de Datos no se limita al almacenamiento, sino que se define por una serie de elementos interrelacionados que garantizan su funcionalidad, seguridad y eficiencia. Estos son los componentes estructurales que todo profesional del área debe dominar:
+
+\subsubsection{Modelos de Datos}
+Representan el formalismo teórico que define cómo se organizan los datos, las relaciones y las restricciones. Estos modelos son el lenguaje conceptual del área.
+
+\begin{itemize}
+    \item \textbf{Modelo Entidad-Relación (E-R):} El modelo conceptual por excelencia, utilizado para la fase inicial de diseño.
+    \item \textbf{Modelo Relacional:} El modelo dominante, basado en la teoría matemática de conjuntos y tablas (relaciones). Es el modelo subyacente que su código Django ORM implementa a nivel lógico.
+    \item \textbf{Modelos NoSQL:} Familia de modelos (documento, clave-valor, grafo) que ofrecen alternativas para datos no estructurados o esquemas flexibles.
+\end{itemize}
+
+\subsubsection{Elementos de Control de Datos}
+Son los componentes que aseguran la calidad y la fiabilidad de la información:
+
+\begin{itemize}
+    \item \textbf{Transacciones:} Conjuntos de operaciones que deben ejecutarse bajo las propiedades ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad) para mantener la BD en un estado coherente.
+    \item \textbf{Restricciones de Integridad:} Reglas definidas en el esquema para limitar los valores o las interacciones permitidas. Incluyen Claves Primarias, Claves Foráneas (que gestionan las relaciones) y restricciones de unicidad.
+\end{itemize}
+
+\subsection{Herramientas}
+\label{subsec:area-herramientas}
+
+Las tecnologías y herramientas son las implementaciones prácticas que permiten definir, gestionar y manipular los datos de acuerdo con los modelos y principios teóricos.
+
+\subsubsection{Sistemas de Gestión de Bases de Datos (SGBD)}
+Son el software que actúa como intermediario entre los usuarios/aplicaciones y los datos físicos almacenados. El SGBD es el responsable de ejecutar la lógica de la BD. Encargados de la gestión del almacenamiento, procesamiento de consultas, control de concurrencia y gestión de la seguridad. Por ejemplo tenemos los gestores: MySQL, PostgreSQL, Oracle, MongoDB, etc.
+
+\subsubsection{Lenguajes de Bases de Datos}
+Son los mecanismos de comunicación utilizados para interactuar con el SGBD.
+
+\begin{itemize}
+    \item \textbf{Lenguaje de Definición de Datos (DDL - Data Definition Language):} Utilizado para crear, modificar o eliminar la estructura de la base de datos (ej., CREATE TABLE, ALTER TABLE). Es Django ORM quien se encarga de crear el DDL de manera abstracta.
+    \item \textbf{Lenguaje de Manipulación de Datos (DML - Data Manipulation Language):} Utilizado para insertar, consultar, actualizar o eliminar los datos (ej., SELECT, INSERT, UPDATE).
+\end{itemize}
+
+\subsubsection{Mapeo Objeto-Relacional (ORM)}
+Es una herramienta esencial para el desarrollo moderno, funcionando como una capa de abstracción que traduce los comandos DML/DDL orientados a objetos (clases y métodos de Python) en comandos SQL (relacionales).
+
+Permite a los desarrolladores trabajar con objetos y clases, manejando la persistencia de forma transparente y eliminando la necesidad de escribir la mayor parte del SQL manual.
+
+\section{Idioms en el modelo conceptual}
+\label{sec:idioms-modelo-conceptual}
+
+\subsection{Definición}
+\label{subsec:idioms-definicion}
+
+El lenguaje Idioms proporciona diferentes construcciones orientadas a representar patrones recurrentes presentes en el modelado conceptual de un dominio. Estas construcciones, denominadas Idioms, permiten expresar relaciones y estructuras semánticas de manera específica, facilitando la representación de situaciones que aparecen con frecuencia durante el diseño de modelos de datos.
+
+\subsection{Características}
+\label{subsec:idioms-caracteristicas}
+
+Los Idioms presentan un conjunto de características que permiten utilizarlos como construcciones específicas dentro del modelado conceptual. Entre las principales se encuentran las siguientes:
+
+\begin{itemize}
+    \item \textbf{Representación de patrones recurrentes:} permiten expresar estructuras y relaciones que aparecen de manera frecuente en diferentes dominios de modelado.
+    \item \textbf{Orientación semántica:} cada Idiom representa una situación conceptual determinada, permitiendo expresar de manera explícita el significado de las relaciones existentes entre los elementos del modelo.
+    \item \textbf{Estructura definida:} cada Idiom establece una forma particular de relacionar entidades y roles, de acuerdo con el patrón que representa.
+    \item \textbf{Reutilización:} los mismos patrones pueden emplearse en diferentes modelos y dominios cuando presentan una estructura conceptual similar.
+    \item \textbf{Extensibilidad del modelo:} los Idioms permiten representar situaciones que pueden evolucionar o incorporar nuevos elementos sin modificar necesariamente la estructura general del patrón utilizado.
+\end{itemize}
+
+\subsection{Elementos}
+\label{subsec: idioms-elementos}
+
+A continuación, se presentan los principales Idioms considerados en el desarrollo del proyecto, describiendo su propósito y las características que los diferencian dentro del modelado conceptual. Estos Idioms constituyen, además, parte de las construcciones consideradas posteriormente durante el procesamiento de los modelos definidos mediante el lenguaje.
+
+\subsubsection{Clasificación o Catálogo}
+El Idiom de clasificación o catálogo permite representar una relación en la que una entidad es asociada con un conjunto de valores o entidades que actúan como sus clasificadores. Este patrón aparece de manera frecuente en los modelos conceptuales, debido a que permite representar características de una entidad mediante valores definidos dentro de un conjunto que puede ser ampliado.
+
+En este tipo de relación intervienen dos roles principales: la entidad clasificada, que corresponde al elemento al cual se asigna una clasificación, y la entidad clasificadora, que contiene los valores utilizados para establecer dicha clasificación. Por ejemplo, una entidad “Persona” puede estar relacionada con una entidad “Ciudad” mediante el atributo o rol “nacionalidad”, de manera que una instancia de Persona pueda asociarse con una instancia determinada de Ciudad.
+
+Una de las características de este Idiom es que el conjunto de clasificadores puede crecer conforme evoluciona el dominio. Por ejemplo, pueden incorporarse nuevas ciudades sin modificar la estructura de la entidad que utiliza dicho catálogo. Asimismo, un mismo catálogo puede ser utilizado para clasificar diferentes entidades cuando el dominio así lo requiere.
+
+La utilización de este Idiom permite representar explícitamente la relación semántica entre una entidad y los valores que pueden clasificarla, evitando incorporar directamente dichos valores como atributos independientes dentro de la entidad clasificada. De esta manera, la estructura del modelo puede mantener una separación entre los elementos que representan entidades del dominio y aquellos que funcionan como valores de clasificación.
+
+\subsubsection{Composición}
