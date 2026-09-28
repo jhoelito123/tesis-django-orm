@@ -200,5 +200,90 @@ Este patrón permite expresar diferencias conceptuales entre tipos de entidades 
 
 \section{Metodología de Desarrollo - Basada en prototipos}
 \label{sec: metodologia}
+
 \subsection{Definición}
-\label{subsec: proto-definicion}
+\label{subsec:prototipos-definicion}
+
+La Metodología Basada en Prototipos es un enfoque de desarrollo de software de ciclo de vida evolutivo e iterativo. Consiste en construir rápidamente una versión funcional (aunque incompleta) del sistema, conocida como ``prototipo'', para obtener una validación temprana por parte del usuario o para clarificar requisitos técnicos complejos \cite{pressman2020ingenieria}.\\
+Este modelo es especialmente útil cuando los requisitos no están completamente definidos al inicio, o cuando se deben mitigar altos riesgos tecnológicos.
+
+\subsection{Características}
+\label{subsec: prototipos-caracteristicas}
+
+Las características principales de esta metodología reflejan su naturaleza evolutiva y enfocada en el usuario (o en el resultado técnico):
+
+\begin{itemize}
+    \item \textbf{Iterativa y Evolutiva:} El desarrollo se realiza en ciclos repetidos. Cada prototipo es una versión mejorada del anterior, añadiendo más funcionalidad y precisión.
+    \item \textbf{Rápida Construcción:} El énfasis está en crear una versión funcional rápidamente, incluso si inicialmente sacrifica el detalle, la eficiencia o la robustez final.
+    \item \textbf{Validación Constante:} El prototipo se valida constantemente. En mi caso, la validación no es por parte del usuario final, sino por el equipo de desarrollo a través de pruebas de coherencia y exactitud del código generado.
+    \item \textbf{Gestión del Riesgo:} El riesgo de fallos en la arquitectura se aborda al inicio, probando los componentes críticos en una etapa temprana.
+\end{itemize}
+
+\subsection{Proceso}
+\label{subsec:prototipos-proceso}
+
+El desarrollo bajo esta metodología generalmente sigue cuatro pasos principales, repetidos en cada ciclo:
+
+\begin{enumerate}
+    \item \textbf{Planificación Rápida de Requisitos:} Se identifican los requisitos iniciales conocidos.
+    \item \textbf{Diseño Rápido (\textit{Quick Design}):} Se enfoca en las interfaces clave y los aspectos críticos de la arquitectura.
+    \item \textbf{Construcción del Prototipo (\textit{Coding}):} Se desarrolla la funcionalidad principal del ciclo.
+    \item \textbf{Evaluación y Ajuste (\textit{Testing}):} El prototipo se somete a pruebas internas. Los errores y las inconsistencias identificadas se usan como \textit{feedback} para refinar y planificar el siguiente prototipo.
+\end{enumerate}
+
+\subsection{Ventajas}
+\label{subsec:prototipos-ventajas}
+
+\begin{itemize}
+    \item \textbf{Mitigación de Riesgos Tecnológicos:} Permite probar y ajustar el \textit{fine-tuning} y la inferencia de CodeT5 en un entorno controlado. Si la IA no genera los Tokens correctamente en el Prototipo 1, el problema se identifica antes de escribir la lógica de generación final, y podría cambiar el enfoque a la gramática original.
+    \item \textbf{Clarificación de Requisitos:} Facilita la definición del formato exacto de los Tokens Intermedios que deben ser generados. La salida de un prototipo se convierte en la entrada formal del siguiente.
+    \item \textbf{Retroalimentación Temprana:} La validación rápida mediante pruebas permite confirmar la precisión de la traducción (determinismo) en cada ciclo, garantizando la coherencia del modelo \texttt{models.py}.
+\end{itemize}
+
+\section{Plataforma de desarrollo}
+\label{subsec:plataforma-desarrollo}
+
+\subsection{Definición}
+\label{subsubsec:plataforma-definicion}
+
+La Plataforma de Desarrollo se define como el entorno integrado de hardware y software que proporciona el conjunto de herramientas, marcos de trabajo (\textit{frameworks}), librerías y lenguajes necesarios para diseñar, construir, probar y desplegar la solución tecnológica propuesta. En el contexto de este proyecto, la plataforma se centra en el lado del servidor (\textit{backend}) y la capa de \textit{Machine Learning}, ya que la interfaz de usuario (\textit{frontend}) es provista por la arquitectura existente (el diagramador basado en \textit{Idioms}).
+
+\subsection{Características}
+\label{subsubsec:plataforma-caracteristicas}
+
+Las características de la plataforma deben enfocarse en cómo las tecnologías seleccionadas dan soporte a los requerimientos clave del proyecto: Generación de Código y Abstracción de Base de Datos.
+
+\paragraph{A. Lenguaje de Programación (Python)}
+Se selecciona Python por su claridad sintáctica y su ecosistema avanzado para el desarrollo \textit{backend} y la inteligencia artificial.
+
+\begin{itemize}
+    \item \textbf{Legibilidad y Mantenibilidad:} Su sintaxis simple facilita la implementación y el mantenimiento de algoritmos complejos, como el que realizará la Gramática Simple para convertir los \textit{Tokens} de la IA a código Django.
+    \item \textbf{Ecosistema de ML/DL:} Proporciona un soporte inigualable para la capa de IA a través de librerías como PyTorch o TensorFlow y el ecosistema Hugging Face para la implementación de CodeT5.
+\end{itemize}
+
+\paragraph{B. Framework de Desarrollo (Django)}
+Django es el \textit{framework} web de alto nivel elegido porque es el destino final del código generado por el módulo. Su Mapeo Objeto-Relacional (ORM) es una de sus características más potentes. Elegir Django como plataforma de desarrollo y como \textit{output} final garantiza que el código generado sea coherente y fácil de integrar en el ecosistema dominante de Python.
+
+\paragraph{C. Componentes de Inteligencia Artificial (CodeT5)}
+Se incorpora la infraestructura necesaria para la implementación del modelo de traducción semántica intermedia.
+
+\begin{itemize}
+    \item \textbf{Librerías de Transformación:} Uso de la librería Hugging Face \texttt{transformers} para cargar el modelo CodeT5. Esta librería estandariza la interacción con modelos de \textit{Deep Learning} de código abierto.
+    \item \textbf{Procesamiento de Tensores:} Utilización del \textit{framework} PyTorch o TensorFlow como \textit{backend} para ejecutar las operaciones matemáticas necesarias para la inferencia y el ajuste fino (\textit{fine-tuning}) del modelo CodeT5 en el entorno local.
+\end{itemize}
+
+\subsection{Herramientas}
+\label{subsubsec:plataforma-herramientas}
+
+Este apartado describe las herramientas de software de apoyo que son fundamentales para la construcción, el control de calidad, el análisis de la estructura de entrada y la gestión colaborativa del código.
+
+\paragraph{ANTLR (ANother Tool for Language Recognition)}
+ANTLR es un generador de \textit{parsers} de código abierto, diseñado para construir \textit{parsers}, \textit{lexers}, y \textit{tree-walkers} a partir de una gramática formal. Se utiliza para leer, procesar y traducir estructuras de datos y lenguajes \cite{parr2013definitive}.
+
+ANTLR es la tecnología que procesa la Gramática de \textit{Idioms} y genera el Árbol Sintáctico de Entrada. Es crucial porque valida sintácticamente el diagrama Entidad-Relación, asegurando que el \textit{input} que recibe CodeT5 sea una estructura de datos formalmente correcta, lo que es un pre-requisito para cualquier traducción determinista.
+
+\paragraph{Sistema de Control de Versiones (Git)}
+Git es un sistema de control de versiones distribuido que rastrea los cambios en el código fuente durante el desarrollo. Permite gestionar las múltiples iteraciones del proyecto, facilitando la colaboración (si es necesaria) y asegurando un historial de cambios.
+
+\paragraph{Entorno de Desarrollo Integrado (IDE) y Entorno Virtual}
+Se utilizan herramientas específicas para facilitar la codificación en Python y la gestión de dependencias complejas. Los IDEs de Python (ej., VS Code o PyCharm) proveen capacidades avanzadas de depuración, autocompletado y análisis de código estático, críticos para trabajar con \textit{frameworks} complejos como Django y librerías de \textit{Deep Learning} como PyTorch. Se combina con entornos virtuales (ej., \texttt{venv} o \texttt{conda}) que aíslan las dependencias del proyecto (incluyendo las versiones específicas) para evitar conflictos con otros proyectos del sistema.
