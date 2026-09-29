@@ -6,7 +6,7 @@
 
 El contexto de este proyecto radica en la necesidad de automatizar la fase de Diseño Lógico de Bases de Datos, particularmente dentro de entornos de desarrollo que priorizan el \textit{framework} Django.
 
-El punto de partida es el ``Diagramador de Modelado Conceptual basado en la Ingeniería de Lenguajes'' (el Proyecto Base). Esta herramienta fue concebida bajo el paradigma de la Generación de Lenguajes Específicos de Dominio, utilizando una Gramática de \textit{Idioms}. Su propósito es capturar el diseño conceptual Entidad-Relación (E-R) de manera formal, abstracta y estandarizada, independientemente del motor de base de datos final. El resultado de este proceso es un Árbol Sintáctico (\textit{AST}) que encapsula todas las entidades, atributos y relaciones.
+El punto de partida es el ``Diagramador de Modelado Conceptual basado en Idioms'' (el Proyecto Base). Esta herramienta fue concebida bajo el paradigma de la Generación de Lenguajes Específicos de Dominio, utilizando una Gramática de \textit{Idioms}. Su propósito es capturar el diseño conceptual Entidad-Relación (E-R) de manera formal, abstracta y estandarizada, independientemente del motor de base de datos final. El resultado de este proceso es un Árbol Sintáctico (\textit{AST}) que encapsula todas las entidades, atributos y relaciones.
 
 Aunque el Diagramador generaba con éxito este \textit{AST} estructurado, su implementación inicial estaba limitada en cuanto a la fase de traducción. El soporte para la generación automática de código ORM (la capa de persistencia) era inexistente o restringido a otros ecosistemas (ej., modelos de persistencia distintos de Django). Este proyecto se centra en cubrir, precisamente, esa brecha.
 
@@ -52,3 +52,49 @@ Este glosario incluye los conceptos técnicos fundamentales del Área de Bases d
 
 Este apartado describe el proceso de flujo de trabajo (\textit{workflow}) que el sistema implementará para traducir un diseño de modelo Entidad-Relación (E-R), definido bajo la Gramática de \textit{Idioms}, al código de la capa de persistencia (\texttt{models.py}) de Django. El proceso se divide en tres etapas principales que definen el \textit{pipeline} de traducción híbrido.
 
+\subsection{Proceso de Generación del Módulo de Traducción}
+\label{subsec:proceso-generacion-modulo}
+
+El proceso de generación del módulo de traducción inicia a partir del modelo definido mediante el lenguaje \textit{Idioms} y concluye con la generación de un archivo \texttt{models.py} compatible con Django ORM. Para el segundo prototipo se plantea una arquitectura híbrida que combina la generación mediante el modelo CodeT5 con un procesamiento determinístico de las relaciones identificadas en el modelo semántico.
+
+Esta separación de responsabilidades surge a partir de los resultados obtenidos durante la evaluación del primer prototipo, en el cual se observó que CodeT5 presentaba dificultades para generar de manera consistente las relaciones entre entidades. Por este motivo, el segundo prototipo mantiene el uso del modelo para la generación de entidades y atributos, mientras que las relaciones son procesadas mediante reglas determinísticas antes de integrarse en los modelos Django generados.
+
+\subsubsection*{Etapa 1: Análisis del modelo Idioms}
+
+Esta etapa corresponde al procesamiento inicial del modelo definido mediante el lenguaje \textit{Idioms}.
+
+\begin{itemize}
+    \item \textbf{Definición del modelo:} El usuario construye el modelo conceptual utilizando las construcciones proporcionadas por el lenguaje \textit{Idioms}.
+    \item \textbf{Análisis sintáctico:} ANTLR4 procesa la entrada de acuerdo con la gramática definida para el lenguaje, permitiendo identificar las entidades, atributos y relaciones presentes en el modelo.
+    \item \textbf{Construcción de la representación semántica:} La información obtenida durante el análisis es organizada en una representación semántica intermedia que contiene las entidades, sus atributos y las relaciones existentes entre ellas.
+\end{itemize}
+
+\subsubsection*{Etapa 2: Generación de entidades y atributos mediante CodeT5}
+
+En esta etapa se utiliza CodeT5 para transformar la información correspondiente a las entidades y sus atributos en estructuras compatibles con Django ORM.
+
+\begin{itemize}
+    \item \textbf{Preparación de la entrada:} A partir de la representación semántica se obtiene la información necesaria para describir las entidades y atributos que serán procesados por CodeT5.
+    \item \textbf{Inferencia del modelo:} CodeT5, previamente ajustado mediante \textit{fine-tuning} con el conjunto de datos preparado para el proyecto, genera las estructuras correspondientes a los modelos Django y sus respectivos campos.
+    \item \textbf{Obtención de los modelos base:} Como resultado de esta etapa se obtiene una representación de los modelos Django que contiene las entidades y atributos generados, pero cuya información de relaciones será incorporada posteriormente mediante el procesamiento determinístico.
+\end{itemize}
+
+\subsubsection*{Etapa 3: Procesamiento determinístico de las relaciones}
+
+A diferencia de la generación de entidades y atributos, las relaciones son procesadas mediante reglas explícitas. Esta etapa tiene como objetivo garantizar que la correspondencia entre las relaciones definidas en \textit{Idioms} y las construcciones equivalentes de Django ORM se realice de manera controlada.
+
+\begin{itemize}
+    \item \textbf{Identificación de las relaciones:} Se recorren las relaciones presentes en la representación semántica, identificando su tipo, entidad de origen, entidad de destino y, cuando corresponde, el rol asociado.
+    \item \textbf{Aplicación de reglas de traducción:} Para cada tipo de relación se aplica una regla determinística que establece la construcción correspondiente en Django ORM.
+    \item \textbf{Generación del campo de relación:} El resultado de la traducción se representa como un campo Django que posteriormente será asociado con el modelo correspondiente. Por ejemplo, una relación de clasificación entre \texttt{User} y \texttt{Country} con el rol \texttt{nationality} puede traducirse en un campo \texttt{ForeignKey} dentro del modelo \texttt{User}.
+\end{itemize}
+
+\subsubsection*{Etapa 4: Integración y generación del archivo final}
+
+Una vez procesadas las entidades, atributos y relaciones, ambas partes del proceso son integradas para construir el código Django ORM final.
+
+\begin{itemize}
+    \item \textbf{Integración de las relaciones:} Los campos de relación obtenidos mediante el procesamiento determinístico son incorporados al modelo Django correspondiente.
+    \item \textbf{Construcción de los modelos:} Se combinan las clases, atributos y campos de relación correspondientes a cada entidad, manteniendo la estructura definida en la representación semántica de entrada.
+    \item \textbf{Generación del archivo:} Finalmente, los modelos integrados son ensamblados en el archivo \texttt{models.py}, que constituye la salida del proceso de traducción hacia Django ORM.
+\end{itemize}
