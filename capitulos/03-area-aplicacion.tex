@@ -1,0 +1,54 @@
+\chapter{ÁREA DE APLICACIÓN}
+\label{chap:area-aplicacion}
+
+\section{Antecedentes}
+\label{sec:antecedentes}
+
+El contexto de este proyecto radica en la necesidad de automatizar la fase de Diseño Lógico de Bases de Datos, particularmente dentro de entornos de desarrollo que priorizan el \textit{framework} Django.
+
+El punto de partida es el ``Diagramador de Modelado Conceptual basado en la Ingeniería de Lenguajes'' (el Proyecto Base). Esta herramienta fue concebida bajo el paradigma de la Generación de Lenguajes Específicos de Dominio, utilizando una Gramática de \textit{Idioms}. Su propósito es capturar el diseño conceptual Entidad-Relación (E-R) de manera formal, abstracta y estandarizada, independientemente del motor de base de datos final. El resultado de este proceso es un Árbol Sintáctico (\textit{AST}) que encapsula todas las entidades, atributos y relaciones.
+
+Aunque el Diagramador generaba con éxito este \textit{AST} estructurado, su implementación inicial estaba limitada en cuanto a la fase de traducción. El soporte para la generación automática de código ORM (la capa de persistencia) era inexistente o restringido a otros ecosistemas (ej., modelos de persistencia distintos de Django). Este proyecto se centra en cubrir, precisamente, esa brecha.
+
+\section{Descripción}
+\label{sec:descripcion}
+
+El área de aplicación de este módulo es la Ingeniería de la Capa de Persistencia dentro del Ecosistema Django.
+
+El flujo de trabajo tradicional del desarrollador Django requiere una traducción determinista y perfecta del diseño de datos conceptual a la implementación lógica en el \texttt{models.py}. Enfatizando en este proceso, se cuenta con un \textit{pipeline} eficiente:
+
+\begin{itemize}
+    \item \textbf{Punto Crítico:} La etapa de la Traducción Semántica, que convierte la información estructurada del \textit{AST} en código ejecutable de Django (un proceso típicamente tedioso).
+    \item \textbf{Solución del Proyecto:} Se utiliza una arquitectura híbrida donde el modelo de IA CodeT5 actúa como el traductor semántico intermedio, tomando el \textit{AST} y generando los \textit{Tokens} específicos de Django. Luego, una gramática simple genera el código Python final.
+    \item \textbf{Impacto:} El proyecto busca transformar el área de aplicación al minimizar el tiempo de desarrollo y garantizar la coherencia estricta entre el modelo conceptual y el código generado, liberando al desarrollador para concentrarse en la lógica de negocio.
+\end{itemize}
+
+\section{Definiciones}
+\label{sec:definiciones}
+
+Este glosario incluye los conceptos técnicos fundamentales del Área de Bases de Datos, la Ingeniería de Lenguajes y el \textit{Machine Learning} aplicado a la generación de código, esenciales para la comprensión del sistema propuesto.
+
+\subsection{Conceptos de Ingeniería de Lenguajes y Parsing}
+\label{subsec:def-lenguajes-parsing}
+
+\begin{itemize}
+    \item \textbf{Gramática de \textit{Idioms}:} Conjunto formal de reglas sintácticas y semánticas que define la estructura del lenguaje de modelado de datos utilizado en el Diagramador. Es el lenguaje de entrada que describe el diseño E-R.
+    \item \textbf{Árbol Sintáctico Abstracto (\textit{AST}):} Estructura de datos jerárquica generada por el \textit{parser} (ANTLR), que representa el código fuente (el diagrama) sin la información sintáctica redundante. Es el \textit{input} estructurado para el módulo CodeT5.
+    \item \textbf{\textit{Parser} / Analizador Sintáctico:} Componente de software (generado por ANTLR) que verifica que la entrada cumpla con la Gramática de \textit{Idioms} y construye el \textit{AST}.
+    \item \textbf{\textit{Tokens} Intermedios (RIS):} La Representación Intermedia Simplificada generada por el modelo CodeT5. Son símbolos lineales que actúan como comandos directos para la generación final de código Django (ej., \texttt{CREATE\_MODEL:Cliente}).
+\end{itemize}
+
+\subsection{Conceptos de Persistencia y ORM}
+\label{subsec:def-persistencia-orm}
+
+\begin{itemize}
+    \item \textbf{ORM (Mapeo Objeto-Relacional):} Técnica de programación que proporciona una capa de abstracción entre un SGBD Relacional y un lenguaje de programación Orientado a Objetos (Python), permitiendo interactuar con la BD usando objetos, clases y métodos.
+    \item \textbf{Capa de Persistencia:} El segmento de código y la infraestructura (la BD) dedicados exclusivamente a la gestión de datos, incluyendo su almacenamiento, recuperación y mantenimiento a largo plazo.
+    \item \textbf{Restricción de Integridad:} Regla aplicada a los datos o las relaciones de la BD para garantizar que la información sea válida y coherente (ej., \texttt{unique=True}, \texttt{on\_delete=CASCADE}).
+\end{itemize}
+
+\section{Procesos}
+\label{sec:procesos}
+
+Este apartado describe el proceso de flujo de trabajo (\textit{workflow}) que el sistema implementará para traducir un diseño de modelo Entidad-Relación (E-R), definido bajo la Gramática de \textit{Idioms}, al código de la capa de persistencia (\texttt{models.py}) de Django. El proceso se divide en tres etapas principales que definen el \textit{pipeline} de traducción híbrido.
+
