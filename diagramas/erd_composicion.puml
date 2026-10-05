@@ -21,7 +21,7 @@ entity "C" as C {
     # C_ID
 }
 
-A ..|{B : "compone a "
-B }|.. C : "es compuesto de "
+A ||--|{B : "compone a "
+B }|--|| C : "es compuesto de "
 
 @enduml

@@ -1,0 +1,29 @@
+@startuml
+skinparam roundcorner 10
+skinparam shadowing false
+skinparam class {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+skinparam activity {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+start
+:Etapa 1: Análisis del modelo Idioms;
+note right: ANTLR4 genera la representación semántica
+
+:Etapa 2: Generación mediante CodeT5;
+note right: Inferencia de Entidades y Atributos
+
+:Etapa 3: Procesamiento Determinístico;
+note right: Aplicación de reglas para Relaciones
+
+:Etapa 4: Integración de componentes;
+:Generación de archivo models.py;
+stop
+@enduml

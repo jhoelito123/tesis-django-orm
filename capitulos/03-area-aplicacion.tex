@@ -59,6 +59,13 @@ El proceso de generación del módulo de traducción inicia a partir del modelo 
 
 Esta separación de responsabilidades surge a partir de los resultados obtenidos durante la evaluación del primer prototipo, en el cual se observó que CodeT5 presentaba dificultades para generar de manera consistente las relaciones entre entidades. Por este motivo, el segundo prototipo mantiene el uso del modelo para la generación de entidades y atributos, mientras que las relaciones son procesadas mediante reglas determinísticas antes de integrarse en los modelos Django generados.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\textwidth]{diagramas/proceso_traduccion/proceso_traduccion.png}
+    \caption{Diagrama de flujo del proceso híbrido de traducción hacia Django ORM.}
+    \label{fig:proceso-traduccion}
+\end{figure}
+
 \subsubsection*{Etapa 1: Análisis del modelo Idioms}
 
 Esta etapa corresponde al procesamiento inicial del modelo definido mediante el lenguaje \textit{Idioms}.
