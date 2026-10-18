@@ -1,0 +1,25 @@
+@startuml
+skinparam roundcorner 10
+skinparam shadowing false
+skinparam activity {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+start
+
+:Representación semántica;
+
+:CodeT5InputBuilder.ts;
+
+:Construcción de ejemplos;
+
+:Input + Output esperado;
+
+:Dataset de entrenamiento;
+
+:CodeT5;
+
+stop
+@enduml

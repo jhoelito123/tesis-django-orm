@@ -1,0 +1,23 @@
+@startuml
+skinparam roundcorner 10
+skinparam shadowing false
+skinparam activity {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+
+start
+
+:CodeT5 base;
+
+:Dataset especializado;
+
+:Fine-tuning;
+
+:Modelo ajustado;
+
+:Evaluación experimental;
+
+stop
+@enduml
