@@ -1,0 +1,43 @@
+@startuml
+skinparam roundcorner 10
+skinparam shadowing false
+skinparam component {
+    BackgroundColor white
+    BorderColor black
+    ArrowColor black
+}
+skinparam database {
+    BackgroundColor white
+    BorderColor black
+}
+
+[semantic.json] as input
+
+package "Capa Determinística (Python)" {
+    [contract.py\n(Validación)] as contract
+    [keys.py\n(Cálculo PK)] as keys
+    [plans.py\n(Relaciones Idioms)] as plans
+    [generate.py\n(Orquestador)] as generate
+}
+
+package "Capa Neuronal (IA)" {
+    [CodeT5 v6\n(Atributos por Entidad)] as codet5
+}
+
+database "Archivos Generados" {
+    [models.py] as models
+    [idiom_constraints.py] as constraints
+    [idiom_sequences.py] as sequences
+}
+
+input --> contract
+contract --> keys
+keys --> plans
+generate --> codet5 : 1 llamada por Entidad (Solo Atributos)
+codet5 --> generate : Arreglo de campos
+plans --> generate
+generate --> models
+generate --> constraints
+generate --> sequences
+
+@enduml
