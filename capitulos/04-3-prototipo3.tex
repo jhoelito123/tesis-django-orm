@@ -1,0 +1,36 @@
+\newpage
+\section{Tercer prototipo: Integración del generador con el entorno visual}
+\label{sec:tercer-prototipo}
+
+Como etapa final del desarrollo, el motor de traducción híbrido se integró directamente en el editor visual de diagramas ER (desarrollado en React y TypeScript), permitiendo a los usuarios generar código Django ORM de manera automática a partir del diseño gráfico de sus modelos conceptuales.
+
+\subsection{Arquitectura de integración y servicio HTTP}
+\label{subsec:p3-arquitectura-servicio}
+
+Debido a que el generador requiere Python, PyTorch y un modelo de lenguaje de gran tamaño (aproximadamente 800 MB), su ejecución directa en el navegador web resulta inviable. Por esta razón, se diseñó e implementó una arquitectura de servicios desacoplada:
+\begin{itemize}
+    \item \textbf{Servicio Backend (FastAPI):} Expone un servicio HTTP persistente que mantiene el modelo CodeT5 cargado en memoria. Proporciona el endpoint principal \texttt{POST /generate} para procesar las solicitudes y un endpoint de control \texttt{GET /health} para verificar el estado de disponibilidad del modelo.
+    \item \textbf{Cliente TypeScript (\texttt{djangoGeneratorClient.ts}):} Componente modular encargado de encapsular la comunicación HTTP, tipar estrictamente los contratos de datos y gestionar tiempos de espera y cancelación de peticiones sin depender de la interfaz de usuario.
+\end{itemize}
+
+\subsection{Optimización del rendimiento de inferencia}
+\label{subsec:p3-optimizacion}
+
+Durante las pruebas de integración en entornos de procesamiento con CPU, se evaluaron estrategias para reducir la latencia del modelo CodeT5. Al implementar procesamiento por lotes (\textit{batching}) de 8 a 16 elementos y búsqueda voraz (\textit{greedy search} con num\_beams = 1), se logró acelerar la inferencia entre 3 y 6,5 veces en comparación con la estrategia secuencial con haces, manteniendo un 100\% de precisión (\textit{Exact Match}) en conjuntos de prueba fuera de distribución (OOD).
+
+\subsection{Flujo de integración en la interfaz de usuario}
+\label{subsec:p3-flujo-ui}
+
+La interacción del usuario con el sistema de generación sigue un pipeline estructurado dentro del entorno visual:
+
+\begin{enumerate}
+    \item \textbf{Extracción y Serialización:} El componente principal del editor (\texttt{ERDiagrammerInner}) recopila los nodos, relaciones y modismos del diagrama activo. Mediante el \textit{hook} \texttt{useCheckGrammar}, esta información se serializa en una representación textual basada en la gramática (\texttt{grammarText}).
+    \item \textbf{Invocación del Generador:} Al seleccionar la opción de exportación a Django, el cliente invoca la función asíncrona \texttt{generateDjangoFiles(grammarText)} (implementada en \texttt{djangoCodegen.ts}). El analizador sintáctico procesa la gramática y el componente \texttt{CodeT5InputBuilder} construye el modelo semántico intermedio.
+    \item \textbf{Comunicación y Gestión de Estados:} La petición HTTP se transmite al backend. Durante la etapa de inicialización del sistema, si el modelo CodeT5 continúa cargándose en memoria, el servidor responde con el código de estado HTTP 503 \textit{Service Unavailable}, informando al diagramador que el modelo no se encuentra disponible temporalmente. Una vez finalizada la carga, las solicitudes se completan de forma exitosa.
+    \item \textbf{Recepción y Descarga de Archivos:} El backend procesa el diagrama mediante la capa determinística y el modelo neuronal, retornando una colección estructurada con los archivos generados (\texttt{models.py}, restricciones y secuencias), junto con los tiempos de procesamiento y advertencias. El frontend recorre la colección y utiliza la función \texttt{saveTextFile()} para gestionar la descarga individual de cada archivo respetando su nomenclatura original.
+\end{enumerate}
+
+\subsection{Manejo de errores y consideraciones futuras}
+\label{subsec:p3-manejo-errores}
+
+El flujo contempla un robusto tratamiento de errores tanto en la interpretación sintáctica como en la comunicación de red, reportando las incidencias directamente a la interfaz de usuario para su depuración. Como mejora futura derivada de la fase de pruebas, se propone integrar de forma nativa la consulta al endpoint de salud del modelo (\texttt{/health}) para deshabilitar temporalmente el botón de generación o mostrar un indicador visual de carga mientras CodeT5 se encuentra inicializando, evitando que el usuario interprete una indisponibilidad temporal como un fallo definitivo del sistema.
