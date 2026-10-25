@@ -2,14 +2,222 @@
 
 \chapter{Código Fuente de \texttt{CodeT5InputBuilder.ts}}
 \label{anx:codigo-builder}
-% Pega o incluye tu código TypeScript aquí
-\begin{verbatim}
-// Código fuente del builder en TypeScript
-\end{verbatim}
 
-\chapter{Ejemplo de Dataset de Entrenamiento}
+Este anexo presenta la implementación completa del componente \texttt{CodeT5InputBuilder.ts}, encargado de recorrer el árbol sintáctico generado por ANTLR y construir el modelo semántico intermedio (\texttt{SemanticModel}) que alimenta tanto la capa determinística como el motor neuronal CodeT5.
+
+\begin{lstlisting}[language=Java, caption={Implementación del constructor semántico en TypeScript}, label={lst:code-t5-builder}, numbers=left, breaklines=true, basicstyle=\ttfamily\small]
+import idiomsListener from "../../antlr/idiomsListener";
+
+import {
+    AttrContext,
+    ClasificationContext,
+    CompositionContext,
+    EntitytypeContext,
+    Historic_reflexiveContext,
+    IdentifierContext,
+    Is_aContext,
+    MasterdetailContext,
+    ReflexiveContext
+} from "../../antlr/idiomsParser";
+
+// Interfaces del modelo
+export interface Attribute {
+    name: string;
+    type: string;
+}
+export interface Identifier {
+    name: string;
+    type: string;
+}
+export interface Entity {
+    name: string;
+    identifier?: Identifier;
+    attributes: Attribute[];
+}
+export interface Relation {
+    type: string;
+    from: string;
+    to: string;
+    role?: string;
+    roles?: string[];
+}
+export interface SemanticModel {
+    language: string;
+    entities: Entity[];
+    relations: Relation[];
+}
+
+// Builder
+export default class CodeT5InputBuilder extends idiomsListener {
+    semantic: SemanticModel;
+    currentEntity: Entity | null;
+    
+    constructor() {
+        super();
+        this.semantic = {
+            language: "",
+            entities: [],
+            relations: []
+        };
+        this.currentEntity = null;
+    }
+
+    public setLanguage(language: string): void {
+        this.semantic.language = language;
+    }
+
+    /* ENTIDADES */
+    enterEntitytype = (ctx: EntitytypeContext) => {
+        const entity: Entity = {
+            name: ctx.ID().getText(),
+            attributes: []
+        };
+        this.semantic.entities.push(entity);
+        this.currentEntity = entity;
+    }
+
+    enterIdentifier = (ctx: IdentifierContext) => {
+        if (!this.currentEntity) return;
+        this.currentEntity.identifier = {
+            name: ctx.FIELDNAME().getText(),
+            type: ctx.TYPE().getText()
+        };
+    }
+
+    enterAttr = (ctx: AttrContext) => {
+        if (!this.currentEntity) return;
+        this.currentEntity.attributes.push({
+            name: ctx.FIELDNAME().getText(),
+            type: ctx.TYPE().getText()
+        });
+    }
+
+    /* RELACIONES */
+    private cleanRole(role?: string): string | undefined {
+        return role?.replace(/"/g, "");
+    }
+
+    enterClasification = (ctx: ClasificationContext) => {
+        this.semantic.relations.push({
+            type: "classification",
+            from: ctx.classified().entity().ID().getText(),
+            to: ctx.classifier().entity().ID().getText(),
+            role: this.cleanRole(
+                ctx.classifier().entity().ROLE()?.getText() ??
+                ctx.classified().entity().ROLE()?.getText()
+            )
+        });
+    }
+
+    enterMasterdetail = (ctx: MasterdetailContext) => {
+        this.semantic.relations.push({
+            type: "master-detail",
+            from: ctx.master().entity().ID().getText(),
+            to: ctx.detail().entity().ID().getText(),
+            role: this.cleanRole(ctx.detail().entity().ROLE()?.getText())
+        });
+    }
+
+    enterComposition = (ctx: CompositionContext) => {
+        const composed = ctx.composed().entity().ID().getText();
+        ctx.composer_list().forEach(composer => {
+            this.semantic.relations.push({
+                type: "composition",
+                from: composer.entity().ID().getText(),
+                to: composed,
+                role: this.cleanRole(composer.entity().ROLE()?.getText())
+            });
+        });
+    }
+
+    enterIs_a = (ctx: Is_aContext) => {
+        this.semantic.relations.push({
+            type: "is-a",
+            from: ctx.supertype().entity().ID().getText(),
+            to: ctx.subtype().entity().ID().getText()
+        });
+    }
+
+    enterHistoric_reflexive = (ctx: Historic_reflexiveContext) => {
+        const roles = [
+            ctx.reflexive_type().entity().ROLE()?.getText(),
+            ctx.ROLE()?.getText(),
+        ].map(r => this.cleanRole(r)).filter((r): r is string => !!r);
+
+        this.semantic.relations.push({
+            type: "historic-reflexive",
+            from: ctx.reflexive_type().entity().ID().getText(),
+            to: ctx.history().entity().ID().getText(),
+            roles,
+        });
+    };
+
+    enterReflexive = (ctx: ReflexiveContext) => {
+        const entity = ctx.entity();
+        const name = entity.ID().getText();
+
+        this.semantic.relations.push({
+            type: "reflexive",
+            from: name,
+            to: name,
+            role: this.cleanRole(entity.ROLE()?.getText()),
+        });
+    };
+
+    /* Utilidades */
+    getSemanticModel(): SemanticModel {
+        return this.semantic;
+    }
+
+    toJSON(): string {
+        return JSON.stringify(this.semantic, null, 4);
+    }
+}
+\end{lstlisting}
+
+\chapter{Ejemplo de Registro del Dataset de Entrenamiento}
 \label{anx:dataset-ejemplo}
-% Ejemplo del JSON del dataset
+
+Este anexo ilustra un ejemplo representativo de la estructura JSON utilizada en el dataset de entrenamiento y ajuste fino para el modelo CodeT5. Cada registro vincula una instrucción formal, la representación semántica de entrada (\texttt{input}) con las entidades y atributos extraídos del diagrama, y el código Django ORM esperado como salida (\texttt{output}).
+
+\begin{lstlisting}[caption={Estructura de un par de entrenamiento (entrada semántica y salida esperada)}, label={lst:dataset-json}, numbers=left, breaklines=true, basicstyle=\ttfamily\small]
+{
+  "instruction": "Generate Django ORM models from the semantic representation.",
+  "input": {
+    "language": "Django",
+    "entities": [
+      {
+        "name": "City",
+        "attributes": [
+          { "name": "name", "type": "string" },
+          { "name": "age", "type": "int" },
+          { "name": "enabled", "type": "boolean" },
+          { "name": "salary", "type": "float" }
+        ]
+      },
+      {
+        "name": "Student",
+        "attributes": [
+          { "name": "enabled", "type": "boolean" },
+          { "name": "salary", "type": "float" },
+          { "name": "name", "type": "string" },
+          { "name": "quantity", "type": "int" }
+        ]
+      },
+      {
+        "name": "User",
+        "attributes": [
+          { "name": "created_at", "type": "date" },
+          { "name": "price", "type": "float" },
+          { "name": "quantity", "type": "int" }
+        ]
+      }
+    ],
+    "relations": []
+  },
+  "output": "from django.db import models\n\nclass City(models.Model):\n    name = models.CharField(max_length=255)\n    age = models.IntegerField()\n    enabled = models.BooleanField(default=False)\n    salary = models.FloatField()\n\nclass Student(models.Model):\n    enabled = models.BooleanField(default=False)\n    salary = models.FloatField()\n    name = models.CharField(max_length=255)\n    quantity = models.IntegerField()\n\nclass User(models.Model):\n    created_at = models.DateField()\n    price = models.FloatField()\n    quantity = models.IntegerField()"
+}
+\end{lstlisting}
 
 \chapter{Resultados de la Prueba Zero-Shot}
 \label{anx:prueba-zeroshot}

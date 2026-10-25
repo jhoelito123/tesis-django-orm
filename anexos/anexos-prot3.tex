@@ -1,5 +1,161 @@
-\chapter{Servicio Backend FastAPI (\texttt{service/})}
+\chapter{Implementación del Servicio Backend (FastAPI)}
 \label{anx:servicio-fastapi}
+
+Este anexo presenta la implementación principal del servicio backend desarrollado en FastAPI, el cual encapsula la lógica de traducción, la validación del contrato semántico y la persistencia del modelo CodeT5 en memoria.
+
+\section{Estructura del módulo de servicio}
+El servicio backend se encuentra estructurado bajo los siguientes componentes principales dentro del proyecto:
+\begin{itemize}
+    \item \texttt{service/app.py}: Capa de entrada que inicializa la aplicación FastAPI, gestiona la carga asíncrona del modelo y configura las políticas de CORS.
+    \item \texttt{service/core.py}: Núcleo de lógica de negocio que procesa las peticiones y conecta el pipeline determinístico con la inferencia de CodeT5.
+    \item \texttt{requirements-service.txt}: Archivo de dependencias del entorno Python para el servicio.
+\end{itemize}
+
+\section{Código fuente: Orquestador del servicio (\texttt{app.py})}
+A continuación se muestra el extracto principal de la lógica del núcleo del servicio:
+
+% Ejemplo usando listings para mostrar código Python limpio
+\begin{lstlisting}[language=Python, caption={Lógica central del servicio backend en FastAPI}, label={lst:service-core}]
+from __future__ import annotations
+import os
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
+from . import core
+
+def create_app(holder: core.ModelHolder | None = None, limits: core.Limits | None = None) -> FastAPI:
+    holder = holder or core.ModelHolder.from_env()
+    limits = limits or core.Limits.from_env()
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        holder.start()    # el modelo carga en segundo plano
+        yield
+
+    app = FastAPI(title="Idioms - generador de Django ORM", lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[os.getenv("CORS_ORIGIN", "*")],
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
+
+    @app.get("/health")
+    def health():
+        return core.health_payload(holder)
+
+    @app.post("/generate")
+    async def generate(request: Request):
+        declared = request.headers.get("content-length")
+        if declared and declared.isdigit() and int(declared) > limits.max_body_bytes:
+            return JSONResponse(status_code=413, content={
+                "error": "body_too_large",
+                "details": [f"el cuerpo supera {limits.max_body_bytes} bytes"]})
+        raw = await request.body()
+        status, body = await run_in_threadpool(core.handle_generate, raw, holder, limits)
+        return JSONResponse(status_code=status, content=body)
+    return app
+app = create_app()
+
+\end{lstlisting}
 
 \chapter{Cliente TypeScript de Generación (\texttt{djangoCodegen.ts})}
 \label{anx:cliente-ts}
+
+Este anexo presenta el código fuente del cliente principal en TypeScript (\texttt{djangoCodegen.ts}), el cual coordina el análisis sintáctico del DSL mediante ANTLR, la construcción del modelo semántico y la comunicación asíncrona con el servicio backend para la obtención del código Django ORM.
+
+\begin{lstlisting}[caption={Implementación del cliente TypeScript para la generación de código}, label={lst:django-codegen-ts}, numbers=left, breaklines=true, basicstyle=\ttfamily\small]
+import { CharStream, CommonTokenStream, ParseTreeWalker } from 'antlr4';
+import idiomsLexer from '../../antlr/idiomsLexer';
+import idiomsParser from '../../antlr/idiomsParser';
+import CodeT5InputBuilder from './CodeT5InputBuilder';
+import type { SemanticModel } from './CodeT5InputBuilder';
+import {
+  DjangoGenerationError,
+  fetchGeneratorHealth,
+  requestGeneration,
+} from './djangoGeneratorClient.ts';
+import type {
+  AttributeSource,
+  GeneratedFile,
+  GenerationResult,
+  GeneratorHealth,
+  PkStrategy,
+} from './djangoGeneratorClient.ts';
+
+export { DjangoGenerationError };
+export type { GeneratedFile, GenerationResult, GeneratorHealth };
+const env = import.meta.env as Record<string, string | undefined>;
+const DEFAULT_GENERATOR_URL = 'http://127.0.0.1:3002';
+const DEFAULT_TIMEOUT_MS = 60_000;
+
+function generatorUrl(): string {
+  return env.VITE_GENERATOR_URL || DEFAULT_GENERATOR_URL;
+}
+
+function generatorTimeoutMs(): number {
+  return Number(env.VITE_GENERATOR_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS;
+}
+
+export interface DjangoGenerationOptions {
+  app?: string;
+  pkStrategy?: PkStrategy;
+  uniqueSequence?: boolean;
+  attributes?: AttributeSource;
+  fallbackToTable?: boolean;
+  signal?: AbortSignal;
+  baseUrl?: string;
+  timeoutMs?: number;
+}
+
+function buildSemanticModel(dsl: string): SemanticModel {
+  let semantic: SemanticModel;
+  try {
+    const chars = new CharStream(dsl);
+    const lexer = new idiomsLexer(chars);
+    const tokens = new CommonTokenStream(lexer);
+    const parser = new idiomsParser(tokens);
+    const tree = parser.root();
+    const builder = new CodeT5InputBuilder();
+    builder.setLanguage('Django');
+    const walker = new ParseTreeWalker();
+    walker.walk(builder, tree);
+    semantic = builder.getSemanticModel();
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new DjangoGenerationError('invalid_diagram', [`No se pudo interpretar el diagrama: ${reason}`]);
+  }
+
+  if (semantic.entities.length === 0) {
+    throw new DjangoGenerationError('invalid_diagram', ['El diagrama no tiene entidades']);
+  }
+  return semantic;
+}
+
+export async function generateDjangoFiles(
+  dsl: string,
+  options: DjangoGenerationOptions = {},
+): Promise<GenerationResult> {
+  const semantic = buildSemanticModel(dsl);
+  return requestGeneration(
+    {
+      semantic,
+      app: options.app,
+      pkStrategy: options.pkStrategy,
+      uniqueSequence: options.uniqueSequence,
+      attributes: options.attributes,
+    },
+    {
+      baseUrl: options.baseUrl ?? generatorUrl(),
+      timeoutMs: options.timeoutMs ?? generatorTimeoutMs(),
+    },
+    { signal: options.signal, fallbackToTable: options.fallbackToTrue },
+  );
+}
+
+export function getGeneratorHealth(options: { baseUrl?: string } = {}): Promise<GeneratorHealth | null> {
+  return fetchGeneratorHealth({ baseUrl: options.baseUrl ?? generatorUrl() });
+}
+\end{lstlisting}

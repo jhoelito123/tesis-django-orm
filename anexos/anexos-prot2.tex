@@ -1,11 +1,314 @@
 \chapter{Generador del Dataset v6 (\texttt{dataset\_generator.py})}
 \label{anx:dataset-v6}
 
-\chapter{Capa Determinística en Python (\texttt{deterministic\_layer/})}
-\label{anx:capa-deterministica}
+Este anexo contiene el código fuente completo del script \texttt{dataset\_generator.py}, responsable de sintetizar de manera determinística y parametrizada los pares de entrenamiento, validación y prueba (\textit{Out-Of-Distribution}) utilizados en el ajuste fino de CodeT5 (Dataset v6).
+
+\begin{lstlisting}[caption={Script de generación programática del dataset v6 para CodeT5}, label={lst:dataset-generator-py}, numbers=left, breaklines=true, basicstyle=\ttfamily\small]
+import json
+import keyword
+import random
+from collections import Counter
+from pathlib import Path
+
+# Configuracion
+SEED = 42
+N_TRAIN = 200
+N_VAL = 50
+N_TEST_OOD = 50
+
+OUTPUT_DIR = Path(__file__).resolve().parent / "dataset"
+
+# Debe usarse identica en entrenamiento e inferencia
+INSTRUCTION = "Generate Django model fields from the entity attributes."
+
+# Tipos aceptados -> campo Django
+DJANGO_FIELDS = {
+    "string":  "models.CharField(max_length=255)",
+    "int":     "models.IntegerField()",
+    "float":   "models.FloatField()",
+    "boolean": "models.BooleanField(default=False)",
+    "date":    "models.DateField()",
+    "time":    "models.TimeField()",
+    "decimal": "models.DecimalField(max_digits=10, decimal_places=2)",
+    "binary":  "models.BinaryField()",
+}
+TYPES = list(DJANGO_FIELDS)
+
+# Pools de nombres (train vs held-out)
+ENTITY_TRAIN = [
+    "User", "Country", "City", "Company", "Department", "Student", "Teacher",
+    "Book", "Author", "Category", "Order", "Product", "Invoice", "Customer",
+    "Phone", "Role", "Address", "Payment", "Employee", "Project", "Task",
+    "Course", "Subject", "Grade", "Supplier", "Warehouse", "Shipment",
+    "Review", "Ticket", "Event",
+    "Pais", "Ciudad", "Estudiante", "Docente", "Libro", "Autor", "Pedido",
+    "Producto", "Factura", "Cliente", "Telefono", "Rol", "Usuario", "Empresa",
+]
+ENTITY_HELD = [
+    "Hospital", "Paciente", "Doctor", "Cita", "Vehiculo", "Conductor",
+    "Hotel", "Reserva", "Loan", "Library", "Sensor", "Device", "Matricula",
+    "Sucursal", "Inventario", "Contrato", "Proveedor", "Receta", "Turno",
+    "Mensaje",
+]
+
+ATTR_TRAIN = [
+    "name", "email", "description", "title", "age", "stock", "quantity",
+    "price", "salary", "is_active", "enabled", "created_at", "birth_date",
+    "number", "status", "type", "code", "address", "phone", "city", "country",
+    "carrera", "nombre", "edad", "precio", "fecha", "estado", "timestamp",
+    "amount", "total", "score", "rating", "weight", "height", "start_time",
+    "end_time", "photo", "file", "content", "role",
+]
+ATTR_HELD = [
+    "apellido", "telefono", "direccion", "saldo", "descuento", "peso",
+    "altura", "hora_inicio", "hora_fin", "avatar", "firma", "documento",
+    "matricula", "semestre", "turno", "expires_at", "last_login", "nickname",
+    "slug", "version",
+]
+
+SUFFIXES = ["id", "Id", "code", "ref", "value", "1", "2"]
+
+# Validacion de nombres (la capa deterministica sanea el resto)
+def valid_name(name):
+    return (
+        name.isidentifier()
+        and name.isascii()
+        and not keyword.iskeyword(name)
+        and name != "pk"
+        and "__" not in name
+        and not name.startswith("_")
+        and not name.endswith("_")
+    )
+
+# Generadores de nombres
+def make_attr_name(rng, pool):
+    base = rng.choice(pool)
+    other = rng.choice(pool)
+    r = rng.random()
+    if r < 0.60:
+        name = base
+    elif r < 0.75:
+        name = f"{base}_{rng.choice(SUFFIXES)}"
+    elif r < 0.88:
+        name = base + other.capitalize()
+    else:
+        name = f"{base}_{other}"
+    return name
+
+
+def make_entity_name(rng, pool):
+    base = rng.choice(pool)
+    other = rng.choice(pool)
+    r = rng.random()
+    if r < 0.65:
+        name = base
+    elif r < 0.85:
+        name = f"{base}_{other.capitalize()}"
+    else:
+        name = base + other.lower()
+    return name
+
+# Generacion de un ejemplo
+def make_entity(rng, entity_pool, attr_pool):
+    while True:
+        name = make_entity_name(rng, entity_pool)
+        if valid_name(name):
+            break
+
+    amount = rng.choices(range(1, 9), weights=[12, 18, 20, 16, 12, 10, 6, 6])[0]
+
+    attributes, used = [], set()
+    while len(attributes) < amount:
+        attr = make_attr_name(rng, attr_pool)
+        if not valid_name(attr) or attr in used:
+            continue
+        used.add(attr)
+        attributes.append({"name": attr, "type": rng.choice(TYPES)})
+
+    return {"name": name, "attributes": attributes}
+
+
+def build_sample(entity):
+    model_input = json.dumps(entity, ensure_ascii=False, separators=(",", ":"))
+    output = "\n".join(
+        f"{a['name']} = {DJANGO_FIELDS[a['type']]}" for a in entity["attributes"]
+    )
+    return {"instruction": INSTRUCTION, "input": model_input, "output": output}
+
+
+def generate_split(rng, amount, entity_pool, attr_pool, seen):
+    samples = []
+    attempts = 0
+    while len(samples) < amount:
+        attempts += 1
+        if attempts > amount * 50:
+            raise RuntimeError("No hay suficientes combinaciones unicas; amplia los pools.")
+        sample = build_sample(make_entity(rng, entity_pool, attr_pool))
+        if sample["input"] in seen:
+            continue
+        seen.add(sample["input"])
+        samples.append(sample)
+    return samples
+
+
+def write_jsonl(path, samples):
+    with open(path, "w", encoding="utf-8") as f:
+        for s in samples:
+            f.write(json.dumps(s, ensure_ascii=False) + "\n")
+
+# Verificacion de consistencia
+def verify(samples):
+    for s in samples:
+        entity = json.loads(s["input"])
+        lines = s["output"].split("\n")
+        assert len(lines) == len(entity["attributes"])
+        for line, attr in zip(lines, entity["attributes"]):
+            assert line.startswith(attr["name"] + " = models.")
+
+# Main
+def main():
+    rng = random.Random(SEED)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    seen = set()
+    train = generate_split(rng, N_TRAIN, ENTITY_TRAIN, ATTR_TRAIN, seen)
+    val = generate_split(rng, N_VAL, ENTITY_TRAIN, ATTR_TRAIN, seen)
+    test_ood = generate_split(rng, N_TEST_OOD, ENTITY_HELD, ATTR_HELD, seen)
+
+    for name, data in (("train", train), ("val", val), ("test_ood", test_ood)):
+        verify(data)
+        write_jsonl(OUTPUT_DIR / f"{name}.jsonl", data)
+
+    types_seen = Counter(
+        a["type"] for s in train for a in json.loads(s["input"])["attributes"]
+    )
+    print("Dataset v6 generado en:", OUTPUT_DIR)
+    print(f"  train: {len(train)} | val: {len(val)} | test_ood: {len(test_ood)}")
+    print("  distribucion de tipos (train):", dict(types_seen))
+    print("  instruccion:", INSTRUCTION)
+
+
+if __name__ == "__main__":
+    main()
+\end{lstlisting}
 
 \chapter{Módulo de Restricciones Compuestas (\texttt{idiom\_constraints.py})}
 \label{anx:idiom-constraints}
+\begin{verbatim}
+from django.db.models.constraints import BaseConstraint
+
+
+class CompositeForeignKeyConstraint(BaseConstraint):
+    def __init__(
+        self,
+        *,
+        name,
+        fields,
+        to_model,            # "app_label.NombreModelo"
+        to_fields,
+        on_delete="CASCADE",
+        violation_error_code=None,
+        violation_error_message=None,
+    ):
+        super().__init__(
+            name=name,
+            violation_error_code=violation_error_code,
+            violation_error_message=violation_error_message,
+        )
+        self.fields = tuple(fields)
+        self.to_model = to_model
+        self.to_fields = tuple(to_fields)
+        self.on_delete = on_delete
+
+    def _clause(self, model, schema_editor):
+        qn = schema_editor.quote_name
+        target = model._meta.apps.get_model(self.to_model)
+        cols = ", ".join(qn(model._meta.get_field(f).column) for f in self.fields)
+        tcols = ", ".join(qn(target._meta.get_field(f).column) for f in self.to_fields)
+        return (
+            f"FOREIGN KEY ({cols}) "
+            f"REFERENCES {qn(target._meta.db_table)} ({tcols}) "
+            f"ON DELETE {self.on_delete} DEFERRABLE INITIALLY DEFERRED"
+        )
+
+    # Se usa cuando la restricción va dentro del CREATE TABLE
+    def constraint_sql(self, model, schema_editor):
+        qn = schema_editor.quote_name
+        return f"CONSTRAINT {qn(self.name)} {self._clause(model, schema_editor)}"
+
+    # Se usa cuando se añade con ALTER TABLE (AddConstraint)
+    def create_sql(self, model, schema_editor):
+        qn = schema_editor.quote_name
+        return (
+            f"ALTER TABLE {qn(model._meta.db_table)} "
+            f"ADD CONSTRAINT {qn(self.name)} {self._clause(model, schema_editor)}"
+        )
+
+    def remove_sql(self, model, schema_editor):
+        qn = schema_editor.quote_name
+        return f"ALTER TABLE {qn(model._meta.db_table)} DROP CONSTRAINT {qn(self.name)}"
+
+    def validate(self, model, instance, exclude=None, using="default"):
+        pass  # la integridad la garantiza la base de datos
+
+    def __eq__(self, other):
+        if isinstance(other, CompositeForeignKeyConstraint):
+            return (
+                self.name == other.name
+                and self.fields == other.fields
+                and self.to_model == other.to_model
+                and self.to_fields == other.to_fields
+                and self.on_delete == other.on_delete
+            )
+        return super().__eq__(other)
+
+    def __hash__(self):
+        return hash((self.name, self.fields, self.to_model, self.to_fields, self.on_delete))
+
+    def __repr__(self):
+        return f"<CompositeForeignKeyConstraint name={self.name!r} {self.fields} -> {self.to_model}{self.to_fields}>"
+
+    def deconstruct(self):
+        path, args, kwargs = super().deconstruct()
+        kwargs.update(
+            fields=self.fields,
+            to_model=self.to_model,
+            to_fields=self.to_fields,
+            on_delete=self.on_delete,
+        )
+        return path, args, kwargs
+
+\end{verbatim}
 
 \chapter{Módulo de Secuencia Concurrente (\texttt{idiom\_sequences.py})}
 \label{anx:idiom-sequences}
+\begin{verbatim}
+from django.db import connections, router, transaction
+from django.db.models import Max
+
+
+class SequentialIdMixin:
+    sequential_field: str = ""
+
+    def save(self, *args, **kwargs):
+        if args:
+            raise TypeError("save() solo admite argumentos con nombre")
+        name = self.sequential_field
+        if not name:
+            raise ValueError(f"{type(self).__name__} debe definir 'sequential_field'")
+
+        # el id ya viene asignado (actualización, o id explícito): no se toca
+        if getattr(self, name) is not None:
+            return super().save(**kwargs)
+
+        using = kwargs.get("using") or router.db_for_write(type(self), instance=self)
+        with transaction.atomic(using=using):
+            connection = connections[using]
+            table = connection.ops.quote_name(self._meta.db_table)
+            with connection.cursor() as cursor:
+                cursor.execute(f"LOCK TABLE {table} IN EXCLUSIVE MODE")
+            current = type(self)._default_manager.using(using).aggregate(m=Max(name))["m"] or 0
+            setattr(self, name, current + 1)
+            kwargs["force_insert"] = True
+            return super().save(**kwargs)
+\end{verbatim}
