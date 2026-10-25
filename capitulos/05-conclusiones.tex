@@ -1,0 +1,32 @@
+\chapter{CONCLUSIONES Y RECOMENDACIONES}
+\label{cap:conclusiones}
+
+\section{Conclusiones}
+\label{sec:conclusiones}
+
+A lo largo del desarrollo de la presente investigación y tras la implementación iterativa de los tres prototipos propuestos para la traducción automática de modelos conceptuales basados en \textit{Idioms} a código Django ORM, se establecen las siguientes conclusiones principales:
+
+\begin{enumerate}
+    \item \textbf{Sobre la inviabilidad del enfoque puramente neuronal para restricciones críticas:} La experimentación inicial con modelos generativos basados en transformadores (\textit{CodeT5} en modo \textit{zero-shot} y ajuste fino completo) demostró que, si bien la IA es eficiente traduciendo atributos simples, presenta fallas estocásticas e inconsistencias estructurales severas al inferir claves primarias compuestas y relaciones relacionales complejas. Esto confirmó la necesidad imperativa de un diseño determinístico para garantizar la integridad referencial en bases de datos relacionales.
+    
+    \item \textbf{Sobre la efectividad de la arquitectura híbrida:} La separación de responsabilidades implementada donde la capa determinística en Python gestiona de forma algorítmica el análisis de contratos, la propagación de llaves y las restricciones relacionales, mientras que CodeT5 se limita exclusivamente a la generación de atributos por entidad— resolvió los problemas de alucinación y pérdida de precisión, logrando un rendimiento óptimo y un bajo acoplamiento.
+    
+    \item \textbf{Sobre las limitaciones del ORM de Django y su resolución técnica:} Se identificaron y superaron restricciones estructurales críticas del ecosistema Django frente a modelos conceptuales avanzados. Mediante el desarrollo de componentes específicos como \texttt{CompositeForeignKeyConstraint} y el mixin concurrente \texttt{SequentialIdMixin}, se logró emular de forma transparente en PostgreSQL el comportamiento ACID de las claves primarias compuestas y las claves foráneas compuestas, aportando una solución de ingeniería reutilizable y de alto valor técnico.
+    
+    \item \textbf{Sobre la optimización y despliegue del sistema:} La integración final mediante un servicio backend independiente en FastAPI y un cliente TypeScript permitió solventar las restricciones físicas de ejecución en el navegador web (debido al tamaño del modelo de lenguaje). Asimismo, la optimización mediante procesamiento por lotes (\textit{batching}) y búsqueda voraz (\textit{greedy search}) redujo drásticamente la latencia de inferencia entre 3 y 6,5 veces, garantizando una experiencia de usuario fluida y con un 100\% de precisión (\textit{Exact Match}) en conjuntos de prueba fuera de distribución (OOD).
+\end{enumerate}
+
+\section{Recomendaciones y Trabajos Futuros}
+\label{sec:recomendaciones}
+
+Derivado de la experiencia de desarrollo, las pruebas de integración y los límites detectados en la arquitectura actual, se proponen las siguientes líneas de acción para futuras investigaciones o evoluciones del proyecto:
+
+\begin{enumerate}
+    \item \textbf{Desarrollo integral de un backend funcional en Django:} Se recomienda implementar una aplicación backend completa sobre el ecosistema de Django utilizando los modelos generados por el sistema, permitiendo validar la ejecución real de migraciones, la incorporación de lógica de negocio y la persistencia y consulta efectiva de datos en bases de datos relacionales productivas.
+    
+    \item \textbf{Exploración de arquitecturas de lenguaje y fine-tuning avanzado:} Se sugiere evaluar el desempeño de modelos de lenguaje de mayor escala o ajustados mediante técnicas de especialización para los casos complejos de relaciones no resueltas, analizando el potencial de que una red neuronal profundice su razonamiento estructural sobre los \textit{Idioms}.
+     
+    \item \textbf{Migración a infraestructura acelerada por GPU y escalabilidad:} Se aconseja evaluar el comportamiento del servicio backend bajo entornos de producción con hardware acelerado (GPU) y medir el rendimiento ante diagramas de gran escala (superiores a 50 o 100 entidades), estableciendo umbrales de concurrencia mediante pruebas de estrés multi-hilo reales.
+    
+    \item \textbf{Ampliación del ecosistema de frameworks destino:} Si bien el presente trabajo se centró exclusivamente en Django ORM y PostgreSQL, la abstracción lograda a través de la representación semántica intermedia (\texttt{semantic.json}) y el pipeline desacoplado abre la posibilidad de implementar nuevos adaptadores de código para otros entornos de backend, tales como  Spring Boot en Java o Laravel en PHP.
+\end{enumerate}
