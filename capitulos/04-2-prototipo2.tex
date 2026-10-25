@@ -1,5 +1,5 @@
 \newpage
-\section{Segundo prototipo: Arquitectura híbrida para la generación de Django ORM}
+\section{Arquitectura híbrida para la generación de Django ORM}
 \label{sec:segundo-prototipo}
 
 A partir de los hallazgos y limitaciones identificadas en el primer prototipo —donde la inferencia puramente neuronal de CodeT5 mostró inestabilidad y falta de determinismo al traducir relaciones complejas y Claves Primarias (PK)—, se diseñó e implementó un segundo prototipo basado en una \textbf{arquitectura híbrida}.
@@ -18,7 +18,7 @@ Ambos componentes interactúan exclusivamente mediante el intercambio de estruct
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.65\textwidth]{diagramas/arquitectura_hibrida_p2/arquitectura_hibrida_p2.png}
-    \caption{Arquitectura híbrida del Prototipo 2 combinando CodeT5 y la capa determinística en Python.}
+    \caption{Arquitectura híbrida combinando CodeT5 y la capa determinística en Python.}
     \label{fig:arquitectura-hibrida-p2}
 \end{figure}
 
