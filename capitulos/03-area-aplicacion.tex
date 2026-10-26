@@ -52,6 +52,10 @@ Este glosario incluye los conceptos técnicos fundamentales del Área de Bases d
 
 Este apartado describe el proceso de flujo de trabajo (\textit{workflow}) que el sistema implementará para traducir un diseño de modelo Entidad-Relación (E-R), definido bajo la Gramática de \textit{Idioms}, al código de la capa de persistencia (\texttt{models.py}) de Django. El proceso se divide en tres etapas principales que definen el \textit{pipeline} de traducción híbrido.
 
+En la ingeniería de traductores de código modernos, el uso de modelos de lenguaje basados en inteligencia artificial (como los Transformers) ha ganado relevancia; sin embargo, delegar la totalidad de la lógica sintáctica a un modelo estocástico puede introducir alucinaciones o inconsistencias estructurales en dominios estrictos como la persistencia de bases de datos. Por esta razón, la literatura recomienda el uso de arquitecturas híbridas, las cuales combinan la flexibilidad de la generación neuronal para componentes altamente repetitivos con la precisión absoluta de los motores basados en reglas determinísticas para las restricciones estructurales y relacionales \cite{pressman2020ingenieria}.
+
+Bajo este principio, el proceso de traducción del proyecto se estructura en el siguiente \textit{pipeline}:
+
 \subsection{Proceso de Generación del Módulo de Traducción}
 \label{subsec:proceso-generacion-modulo}
 

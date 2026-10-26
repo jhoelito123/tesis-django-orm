@@ -69,34 +69,36 @@ Desarrollar un Módulo de Traducción para el ORM de Django, a través de un med
 \label{sec:alcance-limitaciones}
 
 \subsection{Alcance}
+El alcance del presente proyecto comprende los siguientes aspectos técnicos y funcionales:
 \begin{itemize}
-    \item El sistema soportará la entrada de representaciones semánticas derivadas de la gramática de *idioms* del Entidad-Relación especifico.
-    \item Se implementará el mapeo de los tipos de datos conceptuales a los campos específicos del ORM de Django en versión Python 3.x.
-    \item Se contemplará el manejo de entidades, atributos (primarios, simples, compuestos, derivados) y relaciones (1:1, 1:N) con sus respectivas restricciones de integridad relacional.
-    \item El módulo se entregará como un componente funcional probado bajo los escenarios de evaluación definidos en los prototipos.
+    \item \textbf{Integración con el diagramador:} El sistema procesa exclusivamente las representaciones semánticas derivadas de la gramática de \textit{idioms} definida para el modelado conceptual específico del proyecto.
+    \item \textbf{Generación para Django ORM:} El mapeo y la traducción de código están acotados de manera exclusiva al framework Django (en su versión compatible con Python 3.x), abarcando la definición de modelos, campos y relaciones.
+    \item \textbf{Soporte de Patrones:} Se contempla la traducción de entidades, atributos y los patrones relacionales formales (clasificación, composición, maestro-detalle, reflexivos, reflexivos con historia y generalización IS-A).
+    \item \textbf{Entorno de Ejecución:} El pipeline completo (incluyendo el servicio backend en FastAPI, el cliente TypeScript y el modelo CodeT5) se encuentra configurado y probado para su ejecución en entornos locales (\textit{localhost}).
+    \item \textbf{Evaluación Experimental:} El sistema incluye la validación formal mediante conjuntos de pruebas estructurados (conjuntos de entrenamiento, validación y prueba OOD) bajo una metodología de prototipos evolutivos.
 \end{itemize}
 
 \subsection{Limitaciones}
+Con el fin de delimitar los objetivos de la investigación, se establecen las siguientes limitaciones:
 \begin{itemize}
-    \item El proyecto no desarrolla ni modifica la interfaz gráfica de usuario (UI), el motor de diagramación. Se asume que estos componentes existen y son funcionales.
-    \item La generación de código está supeditada al soporte expresado dentro de la gramática de *idioms* formalizada en el alcance del proyecto.
-    \item El rendimiento del modelo de lenguaje dependerá de las capacidades de cómputo para el proceso de fine-tuning y ejecución de inferencias.
+    \item \textbf{Alcance acotado de la Interfaz de Usuario:} El proyecto se centra exclusivamente en el motor de traducción y el servicio backend. Aunque se integró un componente mínimo de comunicación (como botones de activación e indicadores de estado) dentro del diagrama desarrollado por terceros, el proyecto no contempla el diseño, desarrollo ni la reestructuración integral de la interfaz gráfica de usuario ni del motor de diagramación.
+    \item \textbf{Restricción de Frameworks de Destino:} La generación de código se limita estrictamente a Django ORM; el sistema no soporta la traducción automática hacia otros frameworks o lenguajes de programación (como Node.js, Spring Boot o Laravel).
+    \item \textbf{Dependencia de la Gramática:} Cualquier modificación o extensión que se requiera realizar sobre los diagramas y que escape a los \textit{idioms} formalizados requerirá una actualización de la gramática en ANTLR y del parser asociado.
+    \item \textbf{Restricciones de Hardware y Despliegue:} El rendimiento de la inferencia neuronal y el ajuste fino (\textit{fine-tuning}) del modelo CodeT5 están condicionados a las capacidades de cómputo del hardware local utilizado. El proyecto no incluye el despliegue en producción en servidores en la nube ni la gestión de alta concurrencia en red pública.
 \end{itemize}
 
 \section{Justificación}
 \label{sec: justify}
-\subsection{Justificación técnica}
+\subsection{Justificación Técnica}
 \begin{itemize}
-    \item Aprovecha la Gramática de Idioms para crear un nuevo módulo.
-    \item Permite la automatización de la traducción con el Árbol de Análisis Sintáctico, eliminando la reescritura manual del código ORM de Django.
-    \item Reduce la probabilidad de errores de sintaxis y mapeo en las relaciones complejas, garantizando mayor coherencia entre diseño conceptual y código final.
-    \item Promueve un estándar de codificación uniforme bajo las convenciones de Django.
+    \item \textbf{Automatización basada en reglas y modelos:} Aprovecha la formalización de la Gramática de Idioms para unificar el análisis sintáctico (via ANTLR) con la potencia de los modelos de lenguaje especializados (CodeT5).
+    \item \textbf{Mitigación de errores humanos:} Elimina la necesidad de escribir manualmente la capa de persistencia repetitiva, reduciendo drásticamente los errores de sintaxis y mapeo en relaciones complejas de bases de datos.
+    \item \textbf{Estandarización:} Promueve un estilo de codificación uniforme y alineado estrictamente con las mejores prácticas y convenciones del ecosistema Django.
 \end{itemize}
 
-\subsection{Justificación Económica}
+\subsection{Justificación Económica y Operativa}
 \begin{itemize}
-    \item Representa un ahorro de costos frente a licencias de software especializado.
-    \item Optimiza recursos de desarrollo al disminuir el tiempo de diseño y codificación manual.
-    \item Expansión estratégica en el mercado al incorporar el popular ecosistema Python/Django.
-    \item Posibilita la evolución futura hacia un modelo de negocio sostenible (soporte, mantenibilidad, integraciones, etc).
+    \item \textbf{Optimización del tiempo de desarrollo:} Reduce significativamente la curva de transición entre la fase de diseño conceptual y la implementación del código backend.
+    \item \textbf{Viabilidad con recursos locales:} Al estructurarse mediante un entorno desacoplado ejecutado localmente, demuestra que es posible implementar herramientas de IA aplicada sin incurrir en costos de infraestructura en la nube o licencias de software privativo.
+    \item \textbf{Escalabilidad futura:} Sienta las bases arquitectónicas para futuras expansiones, tales como la integración con otros frameworks o la migración de la infraestructura a entornos productivos distribuidos.
 \end{itemize}

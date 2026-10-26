@@ -7,13 +7,13 @@
 
 \vspace{0.3cm}
 
-\noindent El presente proyecto de grado aborda la generación automática de la capa de persistencia en aplicaciones mediante el desarrollo de un módulo traductor de código enfocado en Django ORM. La propuesta integra la Gramática de Idioms de un diagramador entidad-relación y técnicas de procesamiento de lenguaje natural aplicadas a código mediante el modelo de lenguaje CodeT5.
+\noindent El presente proyecto de grado aborda la traducción automática de modelos conceptuales basados en \textit{Idioms} a código Django ORM, proponiendo una arquitectura híbrida que combina procesamiento sintáctico determinístico y modelos de lenguaje especializados. El sistema procesa los diagramas mediante un analizador basado en ANTLR y utiliza el modelo CodeT5, optimizado mediante ajuste fino (\textit{fine-tuning}), para la generación automatizada de la capa de persistencia.
 
 \vspace{0.3cm}
 
-\noindent A través de una metodología iterativa basada en prototipos, se diseñó e implementó un pipeline que procesa la representación semántica derivada del análisis sintáctico (mediante ANTLR) y la transforma en declaraciones de modelos Django robustas y funcionales. El sistema fue evaluado bajo escenarios de generación zero-shot y fine-tuning, alcanzando métricas óptimas de exactitud sintáctica y semántica en la traducción.
+\noindent A través de una metodología iterativa basada en prototipos, se diseñó e implementó un pipeline que supera las limitaciones estocásticas de la inteligencia artificial y las restricciones estructurales del ORM de Django frente a relaciones complejas. Mediante componentes determinísticos en Python, el desarrollo de esquemas para claves compuestas y un servicio backend desacoplado en FastAPI con un cliente en TypeScript, el sistema garantiza la integridad referencial y alcanza un rendimiento óptimo en la generación de código.
 
 \vspace{0.8cm}
 
 % Palabras Clave
-\noindent \textbf{Palabras Clave:} Django ORM, CodeT5, ANTLR, Gramática de Idioms, Generación de Código, Capa de Persistencia, Modelos de Lenguaje.
+\noindent \textbf{Palabras Clave:} Django ORM, CodeT5, ANTLR, Gramática de Idioms, Arquitectura Híbrida, Generación de Código, FastAPI.

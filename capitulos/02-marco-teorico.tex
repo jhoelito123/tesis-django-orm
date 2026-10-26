@@ -265,7 +265,7 @@ Se selecciona Python por su claridad sintáctica y su ecosistema avanzado para e
 Django es el \textit{framework} web de alto nivel elegido porque es el destino final del código generado por el módulo. Su Mapeo Objeto-Relacional (ORM) es una de sus características más potentes. Elegir Django como plataforma de desarrollo y como \textit{output} final garantiza que el código generado sea coherente y fácil de integrar en el ecosistema dominante de Python.
 
 \paragraph{C. Componentes de Inteligencia Artificial (CodeT5)}
-Se incorpora la infraestructura necesaria para la implementación del modelo de traducción semántica intermedia.
+Se incorpora la infraestructura necesaria para la generación automatizada de la capa de persistencia se empleó el modelo CodeT5, una arquitectura basada en codificador-decodificador preentrenada con consciencia de identificadores para tareas de ingeniería de software \cite{wang2021codet5}.
 
 \begin{itemize}
     \item \textbf{Librerías de Transformación:} Uso de la librería Hugging Face \texttt{transformers} para cargar el modelo CodeT5. Esta librería estandariza la interacción con modelos de \textit{Deep Learning} de código abierto.
@@ -278,8 +278,9 @@ Se incorpora la infraestructura necesaria para la implementación del modelo de 
 Este apartado describe las herramientas de software de apoyo que son fundamentales para la construcción, el control de calidad, el análisis de la estructura de entrada y la gestión colaborativa del código.
 
 \paragraph{ANTLR (ANother Tool for Language Recognition)}
-ANTLR es un generador de \textit{parsers} de código abierto, diseñado para construir \textit{parsers}, \textit{lexers}, y \textit{tree-walkers} a partir de una gramática formal. Se utiliza para leer, procesar y traducir estructuras de datos y lenguajes \cite{parr2013definitive}.
+ANTLR es un generador de \textit{parsers} de código abierto, diseñado para construir analizadores léxicos (\textit{lexers}), sintácticos (\textit{parsers}) y recorredores de árboles (\textit{tree-walkers}) a partir de una gramática formal \cite{parr2013definitive}. En el ámbito de la ingeniería de software, esta herramienta se utiliza para procesar Lenguajes Específicos de Dominio (\textit{DSLs}), transformando representaciones textuales o visuales abstractas en estructuras de datos procesables \cite{fowler2010dsl}. 
 
+En la presente arquitectura, ANTLR cumple el rol crítico de procesar la gramática de \textit{Idioms} y construir el Árbol Sintáctico Abstracto (\textit{AST}), asegurando que la entrada estructurada que recibe el modelo de inteligencia artificial cumpla rigurosamente con las reglas formales del modelado conceptual antes de la traducción de código.
 ANTLR es la tecnología que procesa la Gramática de \textit{Idioms} y genera el Árbol Sintáctico de Entrada. Es crucial porque valida sintácticamente el diagrama Entidad-Relación, asegurando que el \textit{input} que recibe CodeT5 sea una estructura de datos formalmente correcta, lo que es un pre-requisito para cualquier traducción determinista.
 
 \paragraph{Sistema de Control de Versiones (Git)}
