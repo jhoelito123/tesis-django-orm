@@ -427,6 +427,70 @@ print(
 )
 \end{lstlisting}
 
-\chapter{Casos de Prueba y Script de Evaluación Automatizada}
-\label{anx:casos-prueba}
+\chapter{Script de Evaluación Automatizada}
 \label{anx:script-evaluacion}
+
+En este anexo se presenta el script en Python utilizado para la evaluación automatizada del modelo entrenado, midiendo métricas de desempeño y exactitud (\textit{Exact Match}) sobre conjuntos de prueba específicos.
+
+\begin{lstlisting}[caption={Script resumido para la evaluación de inferencia y cálculo de exactitud del modelo CodeT5}, label={anx:code-evaluation}]
+import json
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+# Configuracion de rutas y rango de prueba
+MODEL_PATH = "../codet5-django-v4.1"
+DATASET_FILE = "../dataset/test_classification_fixed.jsonl"
+START_INDEX = 18
+END_INDEX = 29
+
+# Cargar dataset de prueba
+with open(DATASET_FILE, "r", encoding="utf-8") as f:
+    examples = [json.loads(line) for line in f if line.strip()]
+
+# Cargar tokenizer y modelo ajustado
+tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_PATH)
+
+total_checked = 0
+total_correct = 0
+
+# Evaluar por rangos definidos
+for index in range(START_INDEX, min(END_INDEX + 1, len(examples))):
+    example = examples[index]
+    instruction = example["instruction"]
+    semantic_input = example["input"]
+    expected_output = example["output"]
+
+    # Construccion del prompt de entrada
+    prompt = f"{instruction}\n\n{semantic_input}"
+
+    # Tokenizacion
+    inputs = tokenizer(
+        prompt, 
+        return_tensors="pt", 
+        truncation=True, 
+        max_length=512
+    )
+
+    # Inferencia mediante beam search
+    outputs = model.generate(
+        **inputs,
+        max_length=512,
+        num_beams=4,
+        early_stopping=True
+    )
+
+    # Decodificacion de la prediccion
+    prediction = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    # Validar Exact Match
+    total_checked += 1
+    if prediction.strip() == expected_output.strip():
+        total_correct += 1
+
+# Calculo final de exactitud (Accuracy)
+if total_checked > 0:
+    accuracy = (total_correct / total_checked) * 100
+    print(f"Accuracy: {accuracy:.2f}% ({total_correct}/{total_checked})")
+else:
+    print("Accuracy: N/A")
+\end{lstlisting}
