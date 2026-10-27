@@ -1,15 +1,13 @@
 \chapter{ÁREA DE APLICACIÓN}
 \label{chap:area-aplicacion}
-
 \section{Antecedentes}
 \label{sec:antecedentes}
 
-El contexto de este proyecto radica en la necesidad de automatizar la fase de Diseño Lógico de Bases de Datos, particularmente dentro de entornos de desarrollo que priorizan el \textit{framework} Django.
+El contexto de este proyecto radica en la necesidad de automatizar la fase de transición entre el diseño conceptual de bases de datos y su implementación lógica, particularmente dentro de entornos de desarrollo orientados al \textit{framework} Django.
 
-El punto de partida es el ``Diagramador de Modelado Conceptual basado en Idioms'' (el Proyecto Base). Esta herramienta fue concebida bajo el paradigma de la Generación de Lenguajes Específicos de Dominio, utilizando una Gramática de \textit{Idioms}. Su propósito es capturar el diseño conceptual Entidad-Relación (E-R) de manera formal, abstracta y estandarizada, independientemente del motor de base de datos final. El resultado de este proceso es un Árbol Sintáctico (\textit{AST}) que encapsula todas las entidades, atributos y relaciones.
+El punto de partida es el ``Diagramador de Modelado Conceptual basado en Idioms'' (el Proyecto Base). Esta herramienta fue concebida bajo el paradigma de la Generación de Lenguajes Específicos de Dominio (\textit{DSLs}), empleando una gramática formal de \textit{Idioms} \cite{fowler2010dsl}. Su propósito fundamental es capturar el diseño conceptual Entidad-Relación (E-R) de manera formal, abstracta y estandarizada. Mediante el uso de un analizador sintáctico basado en ANTLR, el proceso genera un Árbol Sintáctico Abstracto (\textit{AST}) que encapsula con precisión todas las entidades, atributos y relaciones del dominio \cite{parr2013definitive}.
 
-Aunque el Diagramador generaba con éxito este \textit{AST} estructurado, su implementación inicial estaba limitada en cuanto a la fase de traducción. El soporte para la generación automática de código ORM (la capa de persistencia) era inexistente o restringido a otros ecosistemas (ej., modelos de persistencia distintos de Django). Este proyecto se centra en cubrir, precisamente, esa brecha.
-
+Si bien el Diagramador procesaba con éxito este \textit{AST} estructurado, su implementación original no contemplaba un mecanismo automatizado para la generación de código dirigida específicamente a la capa de persistencia de Django ORM. Este proyecto se centra en cubrir, precisamente, esa brecha mediante el desarrollo de un módulo traductor híbrido que conecta el modelado conceptual con el código de producción.
 \section{Descripción}
 \label{sec:descripcion}
 
@@ -22,11 +20,10 @@ El flujo de trabajo tradicional del desarrollador Django requiere una traducció
     \item \textbf{Solución del Proyecto:} Se utiliza una arquitectura híbrida donde el modelo de IA CodeT5 actúa como el traductor semántico intermedio, tomando el \textit{AST} y generando los \textit{Tokens} específicos de Django. Luego, una gramática simple genera el código Python final.
     \item \textbf{Impacto:} El proyecto busca transformar el área de aplicación al minimizar el tiempo de desarrollo y garantizar la coherencia estricta entre el modelo conceptual y el código generado, liberando al desarrollador para concentrarse en la lógica de negocio.
 \end{itemize}
-
 \section{Definiciones}
 \label{sec:definiciones}
 
-Este glosario incluye los conceptos técnicos fundamentales del Área de Bases de Datos, la Ingeniería de Lenguajes y el \textit{Machine Learning} aplicado a la generación de código, esenciales para la comprensión del sistema propuesto.
+Este glosario incluye los conceptos técnicos fundamentales del Área de Bases de Datos, la Ingeniería de Lenguajes, el \textit{Machine Learning} aplicado a código y las tecnologías de desarrollo web, esenciales para la comprensión del sistema propuesto.
 
 \subsection{Conceptos de Ingeniería de Lenguajes y Parsing}
 \label{subsec:def-lenguajes-parsing}
@@ -38,13 +35,23 @@ Este glosario incluye los conceptos técnicos fundamentales del Área de Bases d
     \item \textbf{\textit{Tokens} Intermedios (RIS):} La Representación Intermedia Simplificada generada por el modelo CodeT5. Son símbolos lineales que actúan como comandos directos para la generación final de código Django (ej., \texttt{CREATE\_MODEL:Cliente}).
 \end{itemize}
 
-\subsection{Conceptos de Persistencia y ORM}
+\subsection{Conceptos de Inteligencia Artificial y Generación de Código}
+\label{subsec:def-ia-codigo}
+
+\begin{itemize}
+    \item \textbf{CodeT5:} Modelo de lenguaje preentrenado basado en la arquitectura \textit{Transformer} (codificador-decodificador), especializado en la comprensión y generación de código fuente con consciencia de identificadores \cite{wang2021codet5}.
+    \item \textbf{Ajuste Fino (\textit{Fine-tuning}):} Proceso de reentrenamiento supervisado de un modelo de lenguaje preentrenado utilizando un conjunto de datos específico del dominio, permitiendo especializar su capacidad de traducción hacia la estructura de Django ORM.
+    \item \textbf{Arquitectura Híbrida:} Patrón de diseño de software que combina modelos estocásticos (como las redes neuronales para la generación de entidades) con motores determinísticos basados en reglas formales (para el procesamiento exacto de relaciones).
+\end{itemize}
+
+\subsection{Conceptos de Persistencia, ORM y Plataforma}
 \label{subsec:def-persistencia-orm}
 
 \begin{itemize}
     \item \textbf{ORM (Mapeo Objeto-Relacional):} Técnica de programación que proporciona una capa de abstracción entre un SGBD Relacional y un lenguaje de programación Orientado a Objetos (Python), permitiendo interactuar con la BD usando objetos, clases y métodos.
     \item \textbf{Capa de Persistencia:} El segmento de código y la infraestructura (la BD) dedicados exclusivamente a la gestión de datos, incluyendo su almacenamiento, recuperación y mantenimiento a largo plazo.
     \item \textbf{Restricción de Integridad:} Regla aplicada a los datos o las relaciones de la BD para garantizar que la información sea válida y coherente (ej., \texttt{unique=True}, \texttt{on\_delete=CASCADE}).
+    \item \textbf{FastAPI:} \textit{Framework} web moderno y de alto rendimiento basado en Python, utilizado para construir el servicio \textit{backend} desacoplado que expone el motor de traducción y procesa las peticiones del cliente.
 \end{itemize}
 
 \section{Procesos}

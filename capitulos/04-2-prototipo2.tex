@@ -38,7 +38,7 @@ Se desarrolló un generador sintético automatizado en Python (\texttt{dataset\_
 \end{itemize}
 
 \subsubsection{Entrenamiento y Resultados de Inferencia (v6)}
-El entrenamiento se ejecutó en Google Colab con aceleración GPU (NVIDIA T4). Evaluado con 50 ejemplos en validación y 50 en pruebas OOD, el modelo alcanzó un **$100\%$ de Exact Match**, logrando copiar correctamente nombres, clases de campo y la cantidad exacta de atributos.
+El entrenamiento se ejecutó en la plataforma en la nube Google Colab \cite{googlecolab}, haciendo uso de aceleración por hardware mediante una unidad de procesamiento gráfico NVIDIA T4. Evaluado con un conjunto de 50 ejemplos de validación y 50 ejemplos en pruebas fuera de distribución (\textit{OOD}), el modelo alcanzó un \textbf{$100\%$ de Exact Match}, logrando replicar con absoluta precisión los nombres, las clases de campo y la cantidad exacta de atributos definidos en el contrato.
 
 Un experimento negativo de control confirmó la hipótesis de diseño: al intentar enviar múltiples entidades o el JSON completo dentro del mismo \textit{prompt}, el modelo perdió atributos y confundió nombres de clases con campos. Por ello, se consolidó la regla de **una llamada por entidad**.
 
@@ -59,6 +59,26 @@ Desarrollada en Python puro sin dependencias de librerías de \textit{Deep Learn
     \end{itemize}
     \item \textbf{\texttt{generate.py} (Orquestador):} Valida el diagrama de entrada, invoca a CodeT5 para la generación de atributos, verifica los arreglos resultantes con \texttt{fields\_check.py} y ensambla el archivo \texttt{models.py} final.
 \end{enumerate}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \begin{tabular}{|p{3.5cm}|p{5.2cm}|p{5.2cm}|}
+        \hline
+        \textbf{Dimensión de Análisis} & \textbf{Primer Prototipo (Enfoque Neuronal Puro)} & \textbf{Segundo Prototipo (Arquitectura Híbrida)} \\
+        \hline
+        \textbf{Unidad de Inferencia} & Traducción del JSON completo del diagrama. & Una entidad por llamada (simplificación de contratos). \\
+        \hline
+        \textbf{Manejo de Relaciones} & Delegado completamente a CodeT5 (alta inestabilidad y alucinaciones). & Capa determinística en Python basada en reglas formales y patrones de \textit{Idioms}. \\
+        \hline
+        \textbf{Claves Primarias y Compuestas} & Generación estocástica propensa a errores sintácticos. & Algoritmo topológico determinístico y soporte mediante \textit{Mixins}. \\
+        \hline
+        \textbf{Exactitud (\textit{Exact Match})} & Baja en escenarios con múltiples relaciones y estructuras OOD. & $100\%$ en validación y pruebas OOD para atributos de entidades. \\
+        \hline
+    \end{tabular}
+    \caption{Comparativa evolutiva entre el primer prototipo y la arquitectura híbrida final.}
+    \label{tab:comparativa-prototipos}
+\end{table}
 
 \subsection{Soluciones a las limitaciones del ORM de Django y PostgreSQL}
 \label{subsec:p2-limitaciones-django}

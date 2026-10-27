@@ -14,6 +14,6 @@ entity "D" as D {
     # D_ID
 }
 
-D }|.. D : "entidad Z / entidad X"
+D }.. D : "entidad Z / entidad X"
 
 @enduml

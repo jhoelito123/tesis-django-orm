@@ -219,11 +219,213 @@ Este anexo ilustra un ejemplo representativo de la estructura JSON utilizada en 
 }
 \end{lstlisting}
 
-\chapter{Resultados de la Prueba Zero-Shot}
+\chapter{Resultados de Pruebas Preliminares y Experimentos Negativos (Zero-Shot)}
 \label{anx:prueba-zeroshot}
+
+Como parte de la fase de experimentación inicial, se evaluó el comportamiento del modelo base \textit{Salesforce/codet5-base} bajo un esquema \textit{Zero-Shot} (es decir, sin aplicar el proceso de ajuste fino o \textit{fine-tuning} con el dataset específico del proyecto). 
+
+El objetivo de esta prueba fue analizar la capacidad nativa del modelo preentrenado para interpretar la estructura de un diagrama conceptual y traducirla directamente a los campos de Django ORM.
+
+\section{Salida Obtenida en Entorno Zero-Shot}
+Al someter al modelo base a una inferencia directa utilizando el contrato estructurado, se observó una degradación severa en la generación, caracterizada por la aparición de bucles de atención y alucinaciones sintácticas. Un ejemplo representativo del resultado obtenido fue el siguiente:
+\begin{lstlisting}[caption={Resultado de alucinación y bucle infinito en inferencia Zero-Shot con CodeT5-base}, label={anx:zeroshot-output}]
+{
+  "name": "User",
+  "name": "Pais",
+  "name": "User",
+  "attributes": [
+    {
+      "name": "name",
+      "type": "string"
+      "name": "Pais",
+      "name": "User",
+      "name": "Pais",
+      "name": "User",
+      "name": "Pais",
+      "name": "User",
+      "name": "Pais"
+    }
+  ]}
+\end{lstlisting}
+
+\section{Análisis del Comportamiento}
+
+Los resultados evidenciaron que el modelo base:
+\begin{enumerate}
+    \item \textbf{Carece de alineación de instrucciones:} Al no haber sido entrenado con el prompt específico del dominio de modelado conceptual, repite nombres de entidades y atributos de manera arbitraria.
+    \item \textbf{sufre de bucles de generación (\textit{Repetition Loops}):} Entra en redundancias sintácticas al intentar completar el JSON, rompiendo por completo la estructura esperada para el analizador posterior.
+\end{enumerate}
+
+Este comportamiento adverso justificó la necesidad imperativa de desarrollar un conjunto de datos especializado (Dataset v6) y aplicar un proceso riguroso de \textit{fine-tuning}.
 
 \chapter{Scripts de Entrenamiento y Fine-Tuning}
 \label{anx:script-entrenamiento}
+
+En este anexo se presenta el script en Python utilizado para llevar a cabo el entrenamiento incremental y el ajuste fino (\textit{fine-tuning}) del modelo CodeT5, partiendo de versiones previas y utilizando el conjunto de datos estructurado.
+
+\begin{lstlisting}[caption={Script principal para el fine-tuning e entrenamiento incremental de CodeT5 (train.py)}, label={anx:train-script}]
+from datasets import load_dataset
+from transformers import (
+    AutoTokenizer,
+    AutoModelForSeq2SeqLM,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments
+)
+import torch
+import os
+
+
+# CONFIGURACION
+# modelo V4 ya entrenado.
+MODEL_PATH = "../codet5-django-v4.1"
+
+DATASET_PATH = (
+    "../dataset/django_dataset_v42.jsonl"
+)
+
+OUTPUT_DIR = "../codet5-django-v4.2"
+
+MAX_INPUT = 512
+MAX_OUTPUT = 512
+
+if not os.path.exists(MODEL_PATH):
+
+    raise FileNotFoundError(
+        f"No se encontro el modelo V4 en: {MODEL_PATH}"
+    )
+
+
+# Cargar Dataset
+print("Loading classification dataset...")
+dataset = load_dataset(
+    "json",
+    data_files={
+        "train": DATASET_PATH
+    }
+)
+
+print(dataset)
+# Tokenizer
+print("\nLoading tokenizer...")
+
+tokenizer = AutoTokenizer.from_pretrained(
+    MODEL_PATH
+)
+
+print("\nLoading V4 model...")
+
+model = AutoModelForSeq2SeqLM.from_pretrained(
+    MODEL_PATH
+)
+
+print("V4 model loaded successfully!")
+
+print(
+    "\nStarting incremental training from:"
+)
+print(
+    MODEL_PATH
+)
+
+
+# Pre - Procesamiento
+def preprocess(example):
+
+    prompt = (
+        example["instruction"]
+        + "\n\n"
+        + example["input"]
+    )
+
+    # Input
+    model_inputs = tokenizer(
+        prompt,
+        max_length=MAX_INPUT,
+        truncation=True,
+        padding="max_length"
+    )
+
+    # Output
+    labels = tokenizer(
+        example["output"],
+        max_length=MAX_OUTPUT,
+        truncation=True,
+        padding="max_length"
+    )
+
+    # Ignorar padding en loss
+    labels_ids = labels["input_ids"]
+
+    labels_ids = [
+        token
+        if token != tokenizer.pad_token_id
+        else -100
+        for token in labels_ids
+    ]
+
+    model_inputs["labels"] = labels_ids
+
+    return model_inputs
+
+
+# Tokenizer
+print("\nTokenizing dataset...")
+tokenized = dataset["train"].map(
+    preprocess
+)
+print("Tokenization finished!")
+
+# Training Arguments
+training_args = Seq2SeqTrainingArguments(
+    output_dir=OUTPUT_DIR,
+    overwrite_output_dir=True,
+
+    # Pocas epocas porque NO estamos entrenando desde cero.
+    num_train_epochs=3,
+
+    # Learning rate pequenio, no modificando lo aprendido previamente
+    learning_rate=1e-5,
+
+    per_device_train_batch_size=4,
+
+    # Acumulamos gradientes para tener un batch efectivo mayor
+    gradient_accumulation_steps=1,
+
+    save_steps=100,
+    save_total_limit=2,
+    logging_steps=20,
+    predict_with_generate=True,
+    fp16=torch.cuda.is_available(),
+
+    report_to="none"
+)
+
+# TRAINER
+trainer = Seq2SeqTrainer(
+    model=model,
+    args=training_args,
+    train_dataset=tokenized,
+    tokenizer=tokenizer
+)
+
+# Entrenamiento
+print("Starting V4.1 incremental training...")
+
+trainer.train()
+print("Saving V4.1 model...")
+
+trainer.save_model(
+    OUTPUT_DIR
+)
+tokenizer.save_pretrained(
+    OUTPUT_DIR
+)
+print("Training finished successfully!")
+print(
+    "New model:",
+    OUTPUT_DIR
+)
+\end{lstlisting}
 
 \chapter{Casos de Prueba y Script de Evaluación Automatizada}
 \label{anx:casos-prueba}

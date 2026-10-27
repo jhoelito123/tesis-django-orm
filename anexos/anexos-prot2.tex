@@ -194,7 +194,10 @@ if __name__ == "__main__":
 
 \chapter{Módulo de Restricciones Compuestas (\texttt{idiom\_constraints.py})}
 \label{anx:idiom-constraints}
-\begin{verbatim}
+
+En este anexo se presenta la implementación de la clase personalizada \textit{CompositeForeignKeyConstraint}, la cual extiende \textit{BaseConstraint} para permitir la generación y gestión de restricciones de claves foráneas compuestas directamente en el esquema relacional de Django.
+
+\begin{lstlisting}[caption={Implementación de CompositeForeignKeyConstraint para claves foráneas compuestas}, label={anx:code-idiom-constraints}]
 from django.db.models.constraints import BaseConstraint
 
 
@@ -204,7 +207,7 @@ class CompositeForeignKeyConstraint(BaseConstraint):
         *,
         name,
         fields,
-        to_model,            # "app_label.NombreModelo"
+        to_model,           # "app_label.NombreModelo"
         to_fields,
         on_delete="CASCADE",
         violation_error_code=None,
@@ -231,12 +234,12 @@ class CompositeForeignKeyConstraint(BaseConstraint):
             f"ON DELETE {self.on_delete} DEFERRABLE INITIALLY DEFERRED"
         )
 
-    # Se usa cuando la restricción va dentro del CREATE TABLE
+    # Se usa cuando la restriccion va dentro del CREATE TABLE
     def constraint_sql(self, model, schema_editor):
         qn = schema_editor.quote_name
         return f"CONSTRAINT {qn(self.name)} {self._clause(model, schema_editor)}"
 
-    # Se usa cuando se añade con ALTER TABLE (AddConstraint)
+    # Se usa cuando se anade con ALTER TABLE (AddConstraint)
     def create_sql(self, model, schema_editor):
         qn = schema_editor.quote_name
         return (
@@ -277,19 +280,18 @@ class CompositeForeignKeyConstraint(BaseConstraint):
             on_delete=self.on_delete,
         )
         return path, args, kwargs
-
-\end{verbatim}
+\end{lstlisting}
 
 \chapter{Módulo de Secuencia Concurrente (\texttt{idiom\_sequences.py})}
 \label{anx:idiom-sequences}
-\begin{verbatim}
+
+En este anexo se presenta el código fuente del \textit{mixin} desarrollado para gestionar la asignación segura de identificadores consecutivos en modelos con claves primarias complejas bajo condiciones de concurrencia.
+
+\begin{lstlisting}[caption={Implementación del SequentialIdMixin para el manejo de bloqueos y secuencias atómicas}, label={anx:code-idiom-sequences}]
 from django.db import connections, router, transaction
 from django.db.models import Max
-
-
 class SequentialIdMixin:
     sequential_field: str = ""
-
     def save(self, *args, **kwargs):
         if args:
             raise TypeError("save() solo admite argumentos con nombre")
@@ -297,7 +299,6 @@ class SequentialIdMixin:
         if not name:
             raise ValueError(f"{type(self).__name__} debe definir 'sequential_field'")
 
-        # el id ya viene asignado (actualización, o id explícito): no se toca
         if getattr(self, name) is not None:
             return super().save(**kwargs)
 
@@ -311,4 +312,4 @@ class SequentialIdMixin:
             setattr(self, name, current + 1)
             kwargs["force_insert"] = True
             return super().save(**kwargs)
-\end{verbatim}
+\end{lstlisting}
