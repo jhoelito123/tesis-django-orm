@@ -2,75 +2,22 @@
 \label{cap:marco-teorico}
 En este capítulo se presentan los fundamentos conceptuales que sustentan el desarrollo del presente proyecto de grado. Se revisan los principales enfoques teóricos, definiciones, características y elementos relevantes del área de conocimiento involucrada, con el fin de establecer una base sólida para la comprensión del problema planteado y de las soluciones propuestas.
 
-\section{Bases de Datos}
-\label{sec:area-conocimiento}
+\section{Fundamentos de Modelado Conceptual y Notaciones de Diseño}
+\label{sec:modelado-conceptual}
 
-\subsection{Definición}
-\label{subsec:area-definiocion}
+\subsection{Evolución y Limitaciones del Modelado Entidad-Relación Tradicional}
+\label{subsec:evolucion-er}
 
-El área de Bases de Datos se define como el campo de estudio centrado en la Teoría y Aplicación de los Sistemas de Gestión de Bases de Datos (SGBD).
+El diseño de bases de datos relacionales encuentra sus cimientos en el modelo Entidad-Relación clásico propuesto originalmente por Peter Chen \cite{chen1976entity}. Si bien este formalismo provee una abstracción matemática sólida para identificar entidades, atributos y relaciones binarias, presenta limitaciones expresivas cuando se enfrenta a dominios de software complejos que requieren patrones estructurales recurrentes (como jerarquías de herencia, composiciones estrictas o relaciones reflexivas históricas).
 
-Desde una perspectiva de ingeniería, esta disciplina busca abstraer la complejidad del almacenamiento físico (los bits en el disco) y presentar una vista lógica coherente de los datos al usuario y a las aplicaciones. Esto implica el diseño de modelos de datos formales (como el Relacional, NoSQL, o Jerárquico) y la creación de un sistema robusto para el procesamiento concurrente de consultas y la protección de la información contra fallas del sistema o accesos no autorizados. (Pearson, 2022)
+Para mitigar estas deficiencias en entornos de desarrollo modernos, se emplean notaciones gráficas normalizadas como la notación de Patas de Gallo (\textit{Crow's Foot Notation}), la cual permite acotar con precisión las cardinalidades (mínima y máxima) y las dependencias de existencia entre entidades. Sin embargo, la representación gráfica por sí sola no garantiza una traducción directa o automatizada hacia el código fuente de los frameworks de persistencia actuales.
 
-\subsection{Características}
-\label{subsec:area-caracteristicas}
+\subsection{La Brecha de Impedancia y el Mapeo Objeto-Relacional (ORM)}
+\label{subsec:brecha-impedancia}
 
-El área de Bases de Datos se caracteriza por la búsqueda constante de los siguientes objetivos técnicos y de gestión:
+Un desafío fundamental en la ingeniería de software es la denominada \textit{brecha de impedancia objeto-relacional} (\textit{Object-Relational Impedance Mismatch}), la cual surge de las diferencias estructurales y paradigmáticas entre los sistemas de gestión de bases de datos relacionales (basados en tablas, tuplas y relaciones matemáticas) y los lenguajes de programación orientados a objetos (basados en clases, herencia y referencias en memoria).
 
-\paragraph{Modelado de Datos}
-Es la actividad central de la disciplina. Consiste en definir la estructura y las restricciones de la información, trasladando los requisitos del mundo real a un formato formal. Esto incluye el diseño conceptual, lógico y físico.
-
-\paragraph{Garantía de Transaccionalidad (ACID)}
-La disciplina se asegura de que las operaciones de modificación de datos se realicen de manera segura a través del concepto de Transacciones. Las propiedades ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad) son el pilar que garantiza que las bases de datos permanezcan en un estado válido a pesar de errores o concurrencias.
-
-\paragraph{Independencia de Datos}
-Busca separar la forma en que los datos se almacenan físicamente (almacenamiento en disco, índices) de la forma en que el usuario o la aplicación ven los datos (esquema lógico).
-
-\paragraph{Optimización del Rendimiento}
-A través del estudio de algoritmos de indexación, query planning y estructuras de almacenamiento, el área de Bases de Datos se enfoca en minimizar el tiempo de respuesta de las consultas y maximizar el rendimiento del sistema en entornos de alto volumen de datos y usuarios.
-
-\subsection{Elementos}
-\label{subsec:area-elementos}
-
-El Área de Bases de Datos no se limita al almacenamiento, sino que se define por una serie de elementos interrelacionados que garantizan su funcionalidad, seguridad y eficiencia. Estos son los componentes estructurales que todo profesional del área debe dominar:
-
-\subsubsection{Modelos de Datos}
-Representan el formalismo teórico que define cómo se organizan los datos, las relaciones y las restricciones. Estos modelos son el lenguaje conceptual del área.
-
-\begin{itemize}
-    \item \textbf{Modelo Entidad-Relación (E-R):} El modelo conceptual por excelencia, utilizado para la fase inicial de diseño.
-    \item \textbf{Modelo Relacional:} El modelo dominante, basado en la teoría matemática de conjuntos y tablas (relaciones). Es el modelo subyacente que su código Django ORM implementa a nivel lógico.
-    \item \textbf{Modelos NoSQL:} Familia de modelos (documento, clave-valor, grafo) que ofrecen alternativas para datos no estructurados o esquemas flexibles.
-\end{itemize}
-
-\subsubsection{Elementos de Control de Datos}
-Son los componentes que aseguran la calidad y la fiabilidad de la información:
-
-\begin{itemize}
-    \item \textbf{Transacciones:} Conjuntos de operaciones que deben ejecutarse bajo las propiedades ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad) para mantener la BD en un estado coherente.
-    \item \textbf{Restricciones de Integridad:} Reglas definidas en el esquema para limitar los valores o las interacciones permitidas. Incluyen Claves Primarias, Claves Foráneas (que gestionan las relaciones) y restricciones de unicidad.
-\end{itemize}
-
-\subsection{Herramientas}
-\label{subsec:area-herramientas}
-
-Las tecnologías y herramientas son las implementaciones prácticas que permiten definir, gestionar y manipular los datos de acuerdo con los modelos y principios teóricos.
-
-\subsubsection{Sistemas de Gestión de Bases de Datos (SGBD)}
-Son el software que actúa como intermediario entre los usuarios/aplicaciones y los datos físicos almacenados. El SGBD es el responsable de ejecutar la lógica de la BD. Encargados de la gestión del almacenamiento, procesamiento de consultas, control de concurrencia y gestión de la seguridad. Por ejemplo tenemos los gestores: MySQL, PostgreSQL, Oracle, MongoDB, etc.
-
-\subsubsection{Lenguajes de Bases de Datos}
-Son los mecanismos de comunicación utilizados para interactuar con el SGBD.
-
-\begin{itemize}
-    \item \textbf{Lenguaje de Definición de Datos (DDL - Data Definition Language):} Utilizado para crear, modificar o eliminar la estructura de la base de datos (ej., CREATE TABLE, ALTER TABLE). Es Django ORM quien se encarga de crear el DDL de manera abstracta.
-    \item \textbf{Lenguaje de Manipulación de Datos (DML - Data Manipulation Language):} Utilizado para insertar, consultar, actualizar o eliminar los datos (ej., SELECT, INSERT, UPDATE).
-\end{itemize}
-
-\subsubsection{Mapeo Objeto-Relacional (ORM)}
-Es una herramienta esencial para el desarrollo moderno, funcionando como una capa de abstracción que traduce los comandos DML/DDL orientados a objetos (clases y métodos de Python) en comandos SQL (relacionales).
-
-Permite a los desarrolladores trabajar con objetos y clases, manejando la persistencia de forma transparente y eliminando la necesidad de escribir la mayor parte del SQL manual.
+Para resolver esta discrepancia sin recurrir masivamente a consultas SQL escritas a mano, se utilizan las herramientas de Mapeo Objeto-Relacional (\textit{ORM}). En el ecosistema de Python, \textit{Django ORM} actúa como una capa de abstracción que traduce las clases declaradas en código fuente hacia esquemas relacionales ejecutables en SGBD como PostgreSQL. No obstante, la construcción manual de estos modelos orientados a objetos a partir de diagramas conceptuales complejos es una tarea propensa a errores humanos y desalineaciones arquitectónicas, lo que motiva la necesidad de automatizar este proceso mediante gramáticas formales.
 
 \section{Idioms en el modelo conceptual}
 \label{sec:idioms-modelo-conceptual}
@@ -196,49 +143,6 @@ Este patrón permite expresar diferencias conceptuales entre tipos de entidades 
     \caption{Representación en lenguaje ERD del patrón Is-A. Adaptado de Flores \cite{flores2006idioms}.}
     \label{fig:erd-is-a}
 \end{figure}
-
-
-\section{Metodología de Desarrollo - Basada en prototipos}
-\label{sec: metodologia}
-
-\subsection{Definición}
-\label{subsec:prototipos-definicion}
-
-La Metodología Basada en Prototipos es un enfoque de desarrollo de software de ciclo de vida evolutivo e iterativo. Consiste en construir rápidamente una versión funcional (aunque incompleta) del sistema, conocida como ``prototipo'', para obtener una validación temprana por parte del usuario o para clarificar requisitos técnicos complejos \cite{pressman2020ingenieria}.\\
-Este modelo es especialmente útil cuando los requisitos no están completamente definidos al inicio, o cuando se deben mitigar altos riesgos tecnológicos.
-
-\subsection{Características}
-\label{subsec: prototipos-caracteristicas}
-
-Las características principales de esta metodología reflejan su naturaleza evolutiva y enfocada en el usuario (o en el resultado técnico):
-
-\begin{itemize}
-    \item \textbf{Iterativa y Evolutiva:} El desarrollo se realiza en ciclos repetidos. Cada prototipo es una versión mejorada del anterior, añadiendo más funcionalidad y precisión.
-    \item \textbf{Rápida Construcción:} El énfasis está en crear una versión funcional rápidamente, incluso si inicialmente sacrifica el detalle, la eficiencia o la robustez final.
-    \item \textbf{Validación Constante:} El prototipo se valida constantemente. En mi caso, la validación no es por parte del usuario final, sino por el equipo de desarrollo a través de pruebas de coherencia y exactitud del código generado.
-    \item \textbf{Gestión del Riesgo:} El riesgo de fallos en la arquitectura se aborda al inicio, probando los componentes críticos en una etapa temprana.
-\end{itemize}
-
-\subsection{Proceso}
-\label{subsec:prototipos-proceso}
-
-El desarrollo bajo esta metodología generalmente sigue cuatro pasos principales, repetidos en cada ciclo:
-
-\begin{enumerate}
-    \item \textbf{Planificación Rápida de Requisitos:} Se identifican los requisitos iniciales conocidos.
-    \item \textbf{Diseño Rápido (\textit{Quick Design}):} Se enfoca en las interfaces clave y los aspectos críticos de la arquitectura.
-    \item \textbf{Construcción del Prototipo (\textit{Coding}):} Se desarrolla la funcionalidad principal del ciclo.
-    \item \textbf{Evaluación y Ajuste (\textit{Testing}):} El prototipo se somete a pruebas internas. Los errores y las inconsistencias identificadas se usan como \textit{feedback} para refinar y planificar el siguiente prototipo.
-\end{enumerate}
-
-\subsection{Ventajas}
-\label{subsec:prototipos-ventajas}
-
-\begin{itemize}
-    \item \textbf{Mitigación de Riesgos Tecnológicos:} Permite probar y ajustar el \textit{fine-tuning} y la inferencia de CodeT5 en un entorno controlado. Si la IA no genera los Tokens correctamente en el Prototipo 1, el problema se identifica antes de escribir la lógica de generación final, y podría cambiar el enfoque a la gramática original.
-    \item \textbf{Clarificación de Requisitos:} Facilita la definición del formato exacto de los Tokens Intermedios que deben ser generados. La salida de un prototipo se convierte en la entrada formal del siguiente.
-    \item \textbf{Retroalimentación Temprana:} La validación rápida mediante pruebas permite confirmar la precisión de la traducción (determinismo) en cada ciclo, garantizando la coherencia del modelo \texttt{models.py}.
-\end{itemize}
 
 \section{Plataforma de desarrollo}
 \label{subsec:plataforma-desarrollo}

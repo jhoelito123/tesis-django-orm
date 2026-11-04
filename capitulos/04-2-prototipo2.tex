@@ -100,7 +100,7 @@ FOREIGN KEY (a, b) REFERENCES tabla_padre (a, b) DEFERRABLE INITIALLY DEFERRED
 \subsubsection{Generación de Secuencias para PK Compuestas (\texttt{SequentialIdMixin})}
 Dado que un campo \texttt{AutoField} no puede formar parte de una \texttt{CompositePrimaryKey} en Django, se desarrolló el mixin \texttt{SequentialIdMixin} (Anexo~\ref{anx:idiom-sequences}). Este componente intercepta el método \texttt{save()} del modelo, aplica un bloqueo de tabla concurrente (\texttt{LOCK TABLE ... IN EXCLUSIVE MODE}) y asigna de manera segura el identificador consecutivo dentro de la transacción, garantizando el cumplimiento del principio ACID bajo concurrencia.
 
-\subsection{Verificación y pruebas del sistema}
+\subsection{Verificación y pruebas del prototipo}
 \label{subsec:p2-verificacion}
 
 El funcionamiento integral del segundo prototipo se verificó mediante tres escenarios de prueba:
